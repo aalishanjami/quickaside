@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' blob:; worker-src 'self' blob:; style-src 'self'; img-src 'self' data:; media-src 'self' blob: mediastream:; connect-src 'self'"
+    />
+    <title>Callaside</title>
+    <link rel="stylesheet" href="theme.css" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="idle">
+    <header class="head">
+      <span class="tally" aria-hidden="true"></span>
+      <span class="timer" id="timer"></span>
+      <span class="head-title" id="headTitle">Callaside</span>
+      <div class="meters" aria-label="Audio levels">
+        <div class="meter you">
+          <span class="meter-label" id="stateYou">You</span>
+          <span class="meter-track"><span class="meter-fill" id="meterYou"></span></span>
+        </div>
+        <div class="meter them">
+          <span class="meter-label" id="stateThem">Them</span>
+          <span class="meter-track"><span class="meter-fill" id="meterThem"></span></span>
+        </div>
+      </div>
+      <button id="libraryBtn" class="icon-btn" type="button" title="Past calls" aria-label="Past calls">
+        <svg viewBox="0 0 20 20" width="17" height="17" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square">
+          <path d="M4 5h12M4 10h12M4 15h8" />
+        </svg>
+      </button>
+      <button id="settingsBtn" class="icon-btn" type="button" title="Settings" aria-label="Settings">
+        <svg viewBox="0 0 20 20" width="17" height="17" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square">
+          <path d="M3 6h7M14 6h3M3 14h3M10 14h7" />
+          <rect x="10" y="3.8" width="4" height="4.4" />
+          <rect x="6" y="11.8" width="4" height="4.4" />
+        </svg>
+      </button>
+      <button id="minBtn" class="icon-btn" type="button" title="Minimize to a small bar" aria-label="Minimize panel">
+        <svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+          <path class="min-line" d="M5 10h10" />
+          <rect class="min-box" x="5" y="5" width="10" height="10" />
+        </svg>
+      </button>
+      <button id="hideBtn" class="icon-btn" type="button" title="Hide. It keeps running in the menu bar." aria-label="Hide panel">
+        <svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+          <path d="M5 5l10 10M15 5L5 15" />
+        </svg>
+      </button>
+    </header>
+
+    <div class="context" id="context" hidden>
+      <span class="project-pick" id="projectWrap" hidden>
+        <select id="projectSelect" aria-label="Project for this call"></select>
+      </span>
+      <button class="text-btn" id="addProject" type="button" hidden>Add a project</button>
+      <button class="note-btn" id="noteBtn" type="button"></button>
+      <form class="note-form" id="noteForm" autocomplete="off" hidden>
+        <input id="noteInput" type="text" maxlength="300" placeholder="For this call, like: worried about price" aria-label="Note for this call" />
+      </form>
+    </div>
+
+    <div id="banners" class="banners" aria-live="polite"></div>
+
+    <main class="stage" id="stage">
+      <section class="home" id="home">
+        <h1 class="home-title" id="homeTitle">Waiting for a call.</h1>
+        <p class="home-sub" id="homeSub"></p>
+        <button class="start" id="startNow" type="button">Start now</button>
+        <ul class="checks" id="checks"></ul>
+      </section>
+
+      <section class="cue-zone" id="cueZone" aria-label="Answers">
+        <section class="call-notes" id="callNotes" aria-label="Notes from this call" hidden>
+          <p class="call-stats" id="callStats" hidden></p>
+          <div id="notesBody"></div>
+        </section>
+        <div class="listening" id="answersEmpty" hidden>
+          <p class="listening-title">Listening.</p>
+          <p class="listening-sub" id="listeningSub"></p>
+        </div>
+        <div class="cues" id="answers"></div>
+      </section>
+
+      <section class="desk" aria-label="Ask">
+        <div class="keys" id="chips"></div>
+        <form id="askForm" class="ask" autocomplete="off">
+          <textarea id="askInput" rows="1" placeholder="Ask about this call"></textarea>
+          <button type="submit" class="send" id="sendBtn" aria-label="Send" title="Send (Enter)">
+            <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square">
+              <path d="M16 4v6.5H5M8.5 7L5 10.5 8.5 14" />
+            </svg>
+          </button>
+        </form>
+      </section>
+
+      <footer class="foot" id="foot">
+        <button class="foot-toggle" id="transcriptToggle" type="button" aria-expanded="false" aria-controls="transcriptPane">
+          <svg class="chevron" viewBox="0 0 12 12" width="11" height="11" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6">
+            <path d="M2.5 7.5L6 4l3.5 3.5" />
+          </svg>
+          <span class="foot-label">Transcript</span>
+          <span class="foot-last" id="lastLine"></span>
+        </button>
+        <span class="backlog" id="backlog" hidden></span>
+        <button class="text-btn" id="copyTranscript" type="button" hidden>Copy</button>
+        <button class="text-btn" id="openSaved" type="button" hidden>Open file</button>
+        <button class="text-btn" id="pauseBtn" type="button" hidden>Pause</button>
+        <button class="text-btn" id="notepadBtn" type="button" aria-expanded="false" aria-controls="notepadPane">Notepad</button>
+        <button class="btn small" id="endBtn" type="button">End call</button>
+      </footer>
+
+      <div class="divider" id="divider" role="separator" aria-orientation="horizontal" title="Drag to resize" hidden></div>
+
+      <section class="notepad" id="notepadPane" aria-label="Notepad" hidden>
+        <textarea id="notepad" placeholder="Your own notes. They go into the summary after the call." aria-label="Your notes"></textarea>
+      </section>
+
+      <section class="log" id="transcriptPane" aria-label="Transcript" hidden>
+        <div class="lines" id="transcript">
+          <div class="empty" id="transcriptEmpty">Nothing heard yet.</div>
+        </div>
+        <button class="jump" id="jumpLive" type="button" hidden>Jump to live</button>
+      </section>
+    </main>
+
+    <div class="toasts" id="toasts" aria-live="polite"></div>
+
+    <script src="ui.js"></script>
+    <script src="markdown.js"></script>
+    <script src="mic.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

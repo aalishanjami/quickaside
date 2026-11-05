@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'"
+    />
+    <title>Callaside Settings</title>
+    <link rel="stylesheet" href="theme.css" />
+    <link rel="stylesheet" href="settings.css" />
+  </head>
+  <body>
+    <svg class="defs" aria-hidden="true">
+      <symbol id="spark" viewBox="0 0 20 20">
+        <path fill="currentColor" d="M9 2.2c.7 4.6 2.7 6.6 7.3 7.3-4.6.7-6.6 2.7-7.3 7.3-.7-4.6-2.7-6.6-7.3-7.3C6.3 8.8 8.3 6.8 9 2.2z" />
+        <path fill="currentColor" d="M15.6 12.8c.3 1.8 1 2.5 2.8 2.8-1.8.3-2.5 1-2.8 2.8-.3-1.8-1-2.5-2.8-2.8 1.8-.3 2.5-1 2.8-2.8z" />
+      </symbol>
+    </svg>
+    <div class="drag-strip" aria-hidden="true"></div>
+
+    <aside class="side">
+      <nav class="nav" id="nav" aria-label="Settings sections">
+        <button class="nav-item" type="button" data-section="you">
+          <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><circle cx="10" cy="7" r="3.2" /><path d="M3.8 17c.7-3.4 3.1-5 6.2-5s5.5 1.6 6.2 5" /></svg>
+          <span>About you</span>
+        </button>
+        <button class="nav-item" type="button" data-section="knowledge">
+          <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M4 3.5h9.5L16 6v10.5H4z" /><path d="M7 8.5h6M7 11.5h6M7 14.5h3.5" /></svg>
+          <span>Knowledge</span>
+        </button>
+        <button class="nav-item" type="button" data-section="projects">
+          <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M3 5h5l1.6 2H17v9.5H3z" /></svg>
+          <span>Projects</span>
+        </button>
+        <button class="nav-item" type="button" data-section="answers">
+          <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M3.5 4h13v9.5H9l-3.5 3v-3h-2z" /></svg>
+          <span>Answers</span>
+        </button>
+        <button class="nav-item" type="button" data-section="listening">
+          <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M3.5 8.5v3M7.2 5.5v9M10.9 3v14M14.6 6.5v7" /></svg>
+          <span>Listening</span>
+        </button>
+        <button class="nav-item" type="button" data-section="connect">
+          <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M8.5 11.5l3-3M9 6.5l1.8-1.8a3 3 0 0 1 4.4 4.2L13.5 10.7M11 13.5l-1.8 1.8a3 3 0 0 1-4.4-4.2l1.7-1.8" /></svg>
+          <span>Connect</span>
+        </button>
+        <button class="nav-item" type="button" data-section="privacy">
+          <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><rect x="4.5" y="9" width="11" height="8" /><path d="M7 9V6.5a3 3 0 0 1 6 0V9" /></svg>
+          <span>Privacy</span>
+        </button>
+        <button class="nav-item" type="button" data-section="advanced">
+          <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M3.5 5.5h13v10h-13zM6.5 9l2 1.8-2 1.8M10.5 12.6h3" /></svg>
+          <span>Advanced</span>
+        </button>
+        <button class="nav-item" type="button" data-section="help">
+          <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><circle cx="10" cy="10" r="7" /><path d="M7.8 8a2.3 2.3 0 1 1 3.4 2c-.8.5-1.2 1-1.2 1.8M10 14.2v.1" /></svg>
+          <span>Help</span>
+        </button>
+      </nav>
+      <p class="about" id="aboutStatus"></p>
+    </aside>
+
+    <main class="content" id="content">
+      <section class="page" data-page="you">
+        <div class="page-head">
+          <div>
+            <h1>About you</h1>
+            <p class="lede">Answers are written in your voice, and only claim what is written here or in Knowledge.</p>
+          </div>
+          <button class="btn draft-all" id="draftAll" type="button"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><use href="#spark" /></svg><span>Draft all</span></button>
+        </div>
+
+        <div class="field">
+          <div class="field-head">
+            <label class="field-title" for="aboutMe">Who you are</label>
+            <button class="spark" type="button" data-draft="aboutMe" title="Draft from your knowledge" aria-label="Draft who you are from your knowledge"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><use href="#spark" /></svg></button>
+          </div>
+          <span class="field-help">Name, role and company.</span>
+          <textarea id="aboutMe" data-key="aboutMe" rows="5" placeholder="I run a small agency that builds AI integrations for service businesses."></textarea>
+        </div>
+
+        <div class="field">
+          <div class="field-head">
+            <label class="field-title" for="offer">What you offer</label>
+            <button class="spark" type="button" data-draft="offer" title="Draft from your knowledge" aria-label="Draft what you offer from your knowledge"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><use href="#spark" /></svg></button>
+          </div>
+          <span class="field-help">Services, pricing and proof. Answers can only claim what is here or in Knowledge.</span>
+          <textarea id="offer" data-key="offer" rows="6"></textarea>
+        </div>
+
+        <div class="field">
+          <div class="field-head">
+            <label class="field-title" for="audience">Who you talk to</label>
+            <button class="spark" type="button" data-draft="audience" title="Draft from your knowledge" aria-label="Draft who you talk to from your knowledge"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><use href="#spark" /></svg></button>
+          </div>
+          <span class="field-help">The people on your calls and what they care about.</span>
+          <textarea id="audience" data-key="audience" rows="4"></textarea>
+        </div>
+
+        <div class="field">
+          <div class="field-head">
+            <label class="field-title" for="instructions">How answers should sound</label>
+            <button class="spark" type="button" data-draft="instructions" title="Draft from your knowledge" aria-label="Draft how answers should sound from your knowledge"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><use href="#spark" /></svg></button>
+          </div>
+          <span class="field-help">Tone, words to avoid, anything you always want.</span>
+          <textarea id="instructions" data-key="instructions" rows="4"></textarea>
+        </div>
+
+      </section>
+
+      <section class="page" data-page="knowledge" hidden>
+        <h1>Knowledge</h1>
+        <p class="lede">Everything answers can draw on. Each answer also shows which notes it opened.</p>
+
+        <div class="tiles">
+          <button class="tile" type="button" id="tileProfile"><span class="tile-num" id="kProfile">0/4</span><span class="tile-label">About you fields, used in every answer</span></button>
+          <div class="tile"><span class="tile-num" id="kContext">0</span><span class="tile-label">Context files, read at the start of each call</span></div>
+          <div class="tile"><span class="tile-num" id="kNotes">Off</span><span class="tile-label">Notes, searched when a question needs them</span></div>
+        </div>
+
+        <section class="source">
+          <div class="set">
+            <div class="set-text">
+              <h2>Notes folder</h2>
+              <span class="set-help">Searched only when a question needs it. Those answers take longer, often 10 to 30 seconds.</span>
+            </div>
+            <input class="switch" type="checkbox" data-key="folderAccess" aria-label="Search a notes folder" />
+          </div>
+          <div class="path-row">
+            <span class="path" id="contextFolderPath">No folder chosen</span>
+            <button class="btn" id="openNotes" type="button">Open</button>
+            <button class="btn" id="pickContextFolder" type="button">Choose folder</button>
+          </div>
+          <p class="issue" id="folderIssue" hidden></p>
+          <div class="scan" id="folderScan" hidden>
+            <dl class="facts" id="folderFacts"></dl>
+            <ul class="bars" id="folderTop"></ul>
+            <p class="fine" id="folderTypes"></p>
+          </div>
+        </section>
+
+        <section class="source">
+          <div class="set">
+            <div class="set-text">
+              <h2>Context files</h2>
+              <span class="set-help">Read in full at the start of each call, so answers stay fast. Good for services, pricing notes and case studies.</span>
+            </div>
+            <button class="btn" id="addFiles" type="button">Add files</button>
+          </div>
+          <ul class="file-list" id="contextFiles"></ul>
+          <div class="budget" id="budget" hidden><span id="budgetFill"></span></div>
+          <p class="fine" id="budgetText"></p>
+        </section>
+
+        <section class="source">
+          <div class="set">
+            <div class="set-text">
+              <h2>What is in here</h2>
+              <span class="set-help">A quick read of what your notes and files cover.</span>
+            </div>
+            <button class="spark" id="draftKnowledge" type="button" title="Read my knowledge and sum it up" aria-label="Sum up my knowledge"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><use href="#spark" /></svg></button>
+          </div>
+          <p class="summary" id="kSummary"></p>
+          <div class="topics" id="kTopics"></div>
+        </section>
+      </section>
+
+      <section class="page" data-page="projects" hidden>
+        <div class="page-head">
+          <div>
+            <h1>Projects</h1>
+            <p class="lede">Pick one when a call starts. Answers use it first, and only search the rest of your notes if they need to.</p>
+          </div>
+          <button class="btn draft-all" id="suggestProjects" type="button"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><use href="#spark" /></svg><span>Suggest projects</span></button>
+        </div>
+
+        <ul class="projects" id="projectList"></ul>
+        <p class="fine" id="projectsEmpty">No projects yet. Add one for each client you have calls with, or press Suggest projects.</p>
+        <div class="project-actions">
+          <button class="btn" id="newProject" type="button">New project</button>
+        </div>
+      </section>
+
+      <section class="page" data-page="answers" hidden>
+        <h1>Answers</h1>
+        <p class="lede">Speed against depth. Mid-call, faster usually wins.</p>
+
+        <div class="group">
+          <span class="set-title">Model</span>
+          <div class="seg" role="radiogroup" aria-label="Model">
+            <label class="seg-item"><input type="radio" name="claudeModel" value="haiku" /><span class="seg-title">Haiku</span><span class="seg-sub">Fastest</span></label>
+            <label class="seg-item"><input type="radio" name="claudeModel" value="sonnet" /><span class="seg-title">Sonnet</span><span class="seg-sub">Balanced</span></label>
+            <label class="seg-item"><input type="radio" name="claudeModel" value="opus" /><span class="seg-title">Opus</span><span class="seg-sub">Smartest</span></label>
+          </div>
+        </div>
+
+        <div class="group">
+          <span class="set-title">Thinking</span>
+          <div class="seg" role="radiogroup" aria-label="Thinking">
+            <label class="seg-item"><input type="radio" name="claudeEffort" value="low" /><span class="seg-title">Fast</span><span class="seg-sub">Best for live calls</span></label>
+            <label class="seg-item"><input type="radio" name="claudeEffort" value="medium" /><span class="seg-title">Thorough</span><span class="seg-sub">Slower, more careful</span></label>
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="set">
+            <div class="set-text">
+              <span class="set-title">Answer every question they ask</span>
+              <span class="set-help">Anything from them that sounds like a question starts an answer, and answers queue up so none get skipped. Uses more of your Claude plan.</span>
+            </div>
+            <input class="switch" type="checkbox" data-key="autoAnswer" aria-label="Answer every question they ask" />
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="set">
+            <div class="set-text">
+              <span class="set-title">Write notes after each call</span>
+              <span class="set-help">A summary, decisions, action items and a follow-up email, from the transcript and your notepad. Needs Save each call turned on, and uses your Claude plan.</span>
+            </div>
+            <input class="switch" type="checkbox" data-key="autoNotes" aria-label="Write notes after each call" />
+          </div>
+          <div class="set">
+            <div class="set-text"><span class="set-sub">Style of notes</span></div>
+            <select data-key="noteTemplate" aria-label="Style of notes">
+              <option value="general">General</option>
+              <option value="sales">Sales call</option>
+              <option value="interview">Interview</option>
+              <option value="oneone">One to one</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" data-page="listening" hidden>
+        <h1>Listening</h1>
+        <p class="lede">Audio stays on this Mac. Only the transcript text is sent for answers.</p>
+
+        <div class="group">
+          <div class="set">
+            <div class="set-text">
+              <span class="set-title">Offer to start when a call begins</span>
+              <span class="set-help">Watches which app has the microphone open, and shows a small prompt for Zoom, Teams, Meet and other call apps. It hears nothing until you press Start.</span>
+            </div>
+            <input class="switch" type="checkbox" data-key="detectCalls" aria-label="Offer to start when a call begins" />
+          </div>
+          <p class="issue" id="detectIssue" hidden>Call detection is not installed, so start calls from the menu bar. Run bash setup.sh to add it.</p>
+          <div class="set">
+            <div class="set-text">
+              <span class="set-title">Open at login</span>
+              <span class="set-help">So it is already watching when your first call starts.</span>
+            </div>
+            <input class="switch" type="checkbox" data-key="openAtLogin" aria-label="Open at login" />
+          </div>
+          <div class="set">
+            <div class="set-text">
+              <span class="set-title">Use my calendar</span>
+              <span class="set-help">Names the call, shows who is on it and suggests the project. It looks at your calendar only when a call starts, and macOS asks first.</span>
+            </div>
+            <input class="switch" type="checkbox" data-key="useCalendar" aria-label="Use my calendar" />
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="set">
+            <div class="set-text">
+              <span class="set-title">Your microphone</span>
+              <span class="set-help">Shows as You in the transcript.</span>
+            </div>
+            <input class="switch" type="checkbox" data-key="captureMic" aria-label="Transcribe my microphone" />
+          </div>
+          <div class="set">
+            <div class="set-text"><span class="set-sub">Input device</span></div>
+            <select data-key="micDeviceId" id="micSelect" aria-label="Input device">
+              <option value="default">System default</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="set">
+            <div class="set-text">
+              <span class="set-title">Call audio</span>
+              <span class="set-help">What your Mac plays, shown as Them. Headphones give the cleanest transcript. Without them your mic also hears the other side, and the app drops most of those echoes.</span>
+            </div>
+            <input class="switch" type="checkbox" data-key="captureSystem" aria-label="Transcribe call audio" />
+          </div>
+        </div>
+
+        <div class="group">
+          <span class="set-title">Speech model</span>
+          <div class="seg" id="modelList" role="radiogroup" aria-label="Speech model"></div>
+        </div>
+
+        <div class="group">
+          <div class="set">
+            <div class="set-text"><span class="set-title">Language</span></div>
+            <select data-key="language" aria-label="Language">
+              <option value="en">English</option>
+              <option value="auto">Detect automatically</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-head">
+            <label class="field-title" for="termInput">Names and terms</label>
+            <button class="spark" id="draftTerms" type="button" title="Find names and terms in my knowledge" aria-label="Find names and terms in my knowledge"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><use href="#spark" /></svg></button>
+          </div>
+          <span class="field-help">Helps the transcript spell people, companies and products correctly.</span>
+          <div class="terms" id="terms">
+            <input id="termInput" type="text" placeholder="Add a name or term" spellcheck="false" />
+          </div>
+          <p class="fine" id="termBudget"></p>
+        </div>
+      </section>
+
+      <section class="page" data-page="connect" hidden>
+        <h1>Connect</h1>
+        <p class="lede">Ask about your past calls from Claude Code or Claude Desktop, with your full history. It runs on this Mac and works when this app is closed.</p>
+
+        <div class="group">
+          <div class="set">
+            <div class="set-text">
+              <span class="set-title">Let Claude read my calls</span>
+              <span class="set-help" id="connectorHelp">Saved calls, transcripts and notes. Claude can't change or delete anything here.</span>
+            </div>
+            <input class="switch" type="checkbox" data-key="connector" aria-label="Let Claude read my calls" />
+          </div>
+        </div>
+
+        <div class="group" id="connectorTargets" hidden>
+          <div class="set">
+            <div class="set-text">
+              <span class="set-title">Claude Code</span>
+              <span class="set-help" id="connectorCodeStatus" aria-live="polite">Checking.</span>
+            </div>
+            <button class="btn" id="connectorCode" type="button" disabled>Connect</button>
+          </div>
+          <div class="set">
+            <div class="set-text">
+              <span class="set-title">Claude Desktop</span>
+              <span class="set-help">Claude Desktop opens and asks you to confirm. It needs Claude Desktop on this Mac.</span>
+            </div>
+            <button class="btn" id="connectorDesktop" type="button">Add</button>
+          </div>
+        </div>
+
+        <div class="group" id="connectorTips" hidden>
+          <div class="set">
+            <div class="set-text">
+              <span class="set-title">Try asking</span>
+              <span class="set-help">What did I promise on my last call? What have clients said about pricing this month? Write a proposal from yesterday's call.</span>
+            </div>
+          </div>
+          <div class="set">
+            <div class="set-text">
+              <span class="set-title">Other people's words</span>
+              <span class="set-help">Transcripts hold what others said, and someone could say something meant to steer Claude. That is why this only reads. Check before you act on anything it finds.</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" data-page="privacy" hidden>
+        <h1>Privacy</h1>
+        <p class="lede">What other people can see, and what stays on your disk.</p>
+
+        <div class="group">
+          <div class="set">
+            <div class="set-text">
+              <span class="set-title">Hide from screen sharing</span>
+              <span class="set-help">Keeps the panel, prompt and this window out of shared screens and recordings.</span>
+            </div>
+            <input class="switch" type="checkbox" data-key="hideFromScreenShare" aria-label="Hide from screen sharing" />
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="set">
+            <div class="set-text">
+              <span class="set-title">Remind me to tell people</span>
+              <span class="set-help">Shows a reminder when each call starts, with a line you can paste in the meeting chat. Some places require everyone's consent.</span>
+            </div>
+            <input class="switch" type="checkbox" data-key="consentReminder" aria-label="Remind me to tell people" />
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="set">
+            <div class="set-text">
+              <span class="set-title">Save each call</span>
+              <span class="set-help">Transcript and answers, as a markdown file.</span>
+            </div>
+            <input class="switch" type="checkbox" data-key="saveTranscripts" aria-label="Save each call" />
+          </div>
+          <div class="path-row">
+            <span class="path" id="saveFolderPath"></span>
+            <button class="btn" id="pickSaveFolder" type="button">Change</button>
+            <button class="btn" id="openSaveFolder" type="button">Open</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" data-page="advanced" hidden>
+        <h1>Advanced</h1>
+        <p class="lede">You should rarely need these.</p>
+
+        <div class="group">
+          <span class="set-title">Appearance</span>
+          <div class="seg" role="radiogroup" aria-label="Appearance">
+            <label class="seg-item"><input type="radio" name="theme" value="system" /><span class="seg-title">System</span><span class="seg-sub">Follows your Mac</span></label>
+            <label class="seg-item"><input type="radio" name="theme" value="light" /><span class="seg-title">Light</span></label>
+            <label class="seg-item"><input type="radio" name="theme" value="dark" /><span class="seg-title">Dark</span></label>
+          </div>
+        </div>
+
+        <label class="field">
+          <span class="field-title">Show or hide the panel</span>
+          <span class="field-help">Global shortcut, in Electron accelerator format. While the call prompt is up, it starts the call.</span>
+          <input data-key="shortcut" type="text" class="mono" spellcheck="false" />
+        </label>
+
+        <label class="field">
+          <span class="field-title">Claude Code path</span>
+          <input data-key="claudePath" type="text" class="mono" placeholder="Found automatically" spellcheck="false" />
+        </label>
+
+        <label class="field">
+          <span class="field-title">whisper-server path</span>
+          <input data-key="whisperServerPath" type="text" class="mono" placeholder="Found automatically" spellcheck="false" />
+        </label>
+      </section>
+
+      <section class="page" data-page="help" hidden>
+        <h1>Help</h1>
+        <p class="lede">Something not working? Nothing leaves this Mac until you choose to share it.</p>
+
+        <div class="group" id="updateGroup" hidden>
+          <div class="set">
+            <div class="set-text">
+              <span class="set-title">Update ready</span>
+              <span class="set-help">It also installs the next time you quit.</span>
+            </div>
+            <button class="btn" id="installUpdate" type="button">Restart to update</button>
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="set">
+            <div class="set-text">
+              <span class="set-title">Report a problem</span>
+              <span class="set-help">Opens a GitHub issue with the details below, and copies the recent log for you to paste. Reports never include your calls, notes or answers.</span>
+            </div>
+            <button class="btn" id="reportIssue" type="button">Report a problem</button>
+          </div>
+          <textarea class="report" id="reportText" rows="14" readonly spellcheck="false" aria-label="What a report shares"></textarea>
+          <div class="report-actions">
+            <button class="btn" id="copyReport" type="button">Copy all</button>
+            <button class="btn" id="showLog" type="button">Show log file</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div class="draft-bar" id="draftBar" hidden>
+      <span class="draft-pulse" aria-hidden="true"></span>
+      <span class="draft-text" id="draftText" aria-live="polite"></span>
+      <button class="text-btn" id="draftStop" type="button">Stop</button>
+    </div>
+
+    <div class="toasts" id="toasts" aria-live="polite"></div>
+
+    <script src="ui.js"></script>
+    <script src="settings.js"></script>
+  </body>
+</html>

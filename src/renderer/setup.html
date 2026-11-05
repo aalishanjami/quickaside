@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'" />
+    <title>Set up Callaside</title>
+    <link rel="stylesheet" href="theme.css" />
+    <link rel="stylesheet" href="setup.css" />
+  </head>
+  <body>
+    <div class="drag-strip" aria-hidden="true"></div>
+    <ol class="steps" id="steps" aria-label="Setup steps"></ol>
+
+    <main class="stage">
+      <section data-step="welcome">
+        <h1>Answers while you're still on the call.</h1>
+        <ul class="points">
+          <li>It listens on this Mac. Audio is never saved or sent anywhere.</li>
+          <li>When they ask something, it drafts your answer from your own notes.</li>
+          <li>The transcript text goes to Claude through your own Claude Code login.</li>
+        </ul>
+        <label class="consent">
+          <input type="checkbox" id="consent" />
+          <span>I'll tell people on my calls that I'm transcribing. Some places require everyone's consent.</span>
+        </label>
+      </section>
+
+      <section data-step="claude" hidden>
+        <h1>Connect Claude Code.</h1>
+        <p class="lede">Answers come from Claude Code on this Mac, using your own Claude plan.</p>
+        <div class="check" id="claudeCheck">
+          <span class="lamp starting" id="claudeLamp"></span>
+          <span id="claudeStatus">Checking</span>
+        </div>
+        <div class="howto" id="claudeHelp" hidden>
+          <p id="claudeHelpText"></p>
+          <div class="command" id="claudeCommandRow">
+            <code id="claudeCommand"></code>
+            <button class="btn small" id="copyCommand" type="button">Copy</button>
+          </div>
+          <button class="btn" id="claudeRetry" type="button">Check again</button>
+        </div>
+      </section>
+
+      <section data-step="speech" hidden>
+        <h1>Download the speech model.</h1>
+        <p class="lede">Speech recognition runs on this Mac, so this is a one-time download.</p>
+        <div class="check">
+          <span class="lamp" id="modelLamp"></span>
+          <span id="modelStatus"></span>
+        </div>
+        <div class="progress" id="modelProgress" hidden><span id="modelFill"></span></div>
+        <div class="actions">
+          <button class="btn" id="modelDownload" type="button" hidden>Download</button>
+        </div>
+        <p class="fine">You can pick a smaller, faster model later in Settings.</p>
+      </section>
+
+      <section data-step="access" hidden>
+        <h1>Allow the mic and call audio.</h1>
+        <p class="lede">macOS asks once for each. The call audio test plays a short tone.</p>
+        <div class="row">
+          <span class="lamp" id="micLamp"></span>
+          <div class="row-text"><strong>Microphone</strong><span id="micStatus">For your side of the call.</span></div>
+          <button class="btn" id="micAllow" type="button">Allow</button>
+          <button class="text-btn" id="micSettings" type="button" hidden>Open Settings</button>
+        </div>
+        <div class="row">
+          <span class="lamp" id="audioLamp"></span>
+          <div class="row-text"><strong>Call audio</strong><span id="audioStatus">For the other side of the call.</span></div>
+          <button class="btn" id="audioTest" type="button">Test</button>
+          <button class="text-btn" id="audioSettings" type="button" hidden>Open Settings</button>
+        </div>
+      </section>
+
+      <section data-step="knowledge" hidden>
+        <h1>Point it at your notes.</h1>
+        <p class="lede">Answers can only claim what your notes say. You can skip this and add them later.</p>
+        <div class="path-row">
+          <span class="path unset" id="folderPath">No folder chosen</span>
+          <button class="btn" id="pickFolder" type="button">Choose folder</button>
+        </div>
+        <p class="fine">Claude reads from this folder only when a question needs it. Then you can press Suggest projects in Settings to set up your clients.</p>
+      </section>
+    </main>
+
+    <footer class="foot">
+      <button class="text-btn" id="back" type="button">Back</button>
+      <span class="spacer"></span>
+      <button class="text-btn" id="skip" type="button" hidden>Skip for now</button>
+      <button class="next" id="next" type="button">Continue</button>
+    </footer>
+
+    <script src="ui.js"></script>
+    <script src="setup.js"></script>
+  </body>
+</html>

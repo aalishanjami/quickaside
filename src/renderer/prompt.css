@@ -1,0 +1,116 @@
+/* The small prompt that asks to start when a call begins. */
+
+body {
+  align-items: center;
+  gap: 11px;
+  padding: 0 8px 0 14px;
+  box-shadow: inset 0 0 0 1px var(--line);
+  -webkit-app-region: drag;
+}
+
+.tally {
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--live);
+  animation: pulse 1.6s ease-in-out infinite;
+}
+
+.words {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+}
+
+.words strong {
+  overflow: hidden;
+  font-size: 15px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.words span {
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.pick {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  margin-top: 2px;
+  -webkit-app-region: no-drag;
+}
+
+.pick::after {
+  content: '';
+  position: absolute;
+  top: 6px;
+  right: 3px;
+  width: 5px;
+  height: 5px;
+  border-right: 1.5px solid var(--muted);
+  border-bottom: 1.5px solid var(--muted);
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+
+.pick select {
+  appearance: none;
+  display: block;
+  max-width: 100%;
+  height: 20px;
+  padding: 0 15px 0 0;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-size: 12.5px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.pick select:hover {
+  color: var(--text);
+}
+
+.start {
+  flex: none;
+  height: 34px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: var(--radius);
+  background: var(--signal);
+  color: var(--on-signal);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+}
+
+.start:hover {
+  background: var(--signal-hover);
+}
+
+.close {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 26px;
+  height: 34px;
+  border: 0;
+  border-radius: var(--radius);
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+}
+
+.close:hover {
+  background: var(--raise-2);
+  color: var(--text);
+}

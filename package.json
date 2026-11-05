@@ -1,0 +1,30 @@
+{
+  "name": "callaside",
+  "productName": "Callaside",
+  "version": "0.1.0",
+  "description": "A side panel that transcribes your call on your Mac and answers questions with your own Claude Code login. No API keys.",
+  "main": "src/main/index.js",
+  "private": true,
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/aalishanjami/callaside/issues"
+  },
+  "scripts": {
+    "start": "electron .",
+    "setup": "bash setup.sh",
+    "build:whisper": "bash scripts/build-whisper.sh",
+    "build:app": "bash scripts/build-mac-app.sh",
+    "icon": "electron scripts/make-icon.js",
+    "test": "node --test test/unit/*.test.js"
+  },
+  "dependencies": {
+    "audiotee": "0.0.7"
+  },
+  "devDependencies": {
+    "@electron/fuses": "2.1.3",
+    "electron": "45.2.2"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

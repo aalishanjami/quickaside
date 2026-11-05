@@ -1,0 +1,279 @@
+/* Shared by the panel and the settings window. */
+
+:root {
+  color-scheme: light dark;
+
+  --bg: #fbfbf9;
+  --raise: #eff0ec;
+  --raise-2: #e3e5e0;
+  --line: #d6d9d3;
+  --text: #101314;
+  --muted: #545d62;
+  --faint: #626c72;
+
+  /* Signal yellow is always a fill with ink on it. --signal-text is for words. */
+  --signal: #ffd60a;
+  --signal-hover: #ffe044;
+  --on-signal: #14160f;
+  --signal-text: #6f5800;
+
+  --live: #d42a21;
+  --live-hover: #bc231b;
+  --you: #17657f;
+  --them: #6f5800;
+  --ok: #0f7a56;
+
+  --warn-bg: #fff3bf;
+  --warn-text: #574500;
+  --error-bg: #fbe1de;
+  --error-text: #8a1f18;
+  --info-bg: var(--raise);
+  --info-text: var(--text);
+
+  --radius: 3px;
+  --font: 'Avenir Next', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --num: 'DIN Alternate', 'Avenir Next', ui-monospace, monospace;
+  --mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0e1113;
+    --raise: #161a1d;
+    --raise-2: #20262a;
+    --line: #2a3136;
+    --text: #f3f5f4;
+    --muted: #a3adb3;
+    --faint: #7f8b91;
+
+    --signal-hover: #ffe044;
+    --signal-text: #ffd60a;
+
+    --live: #d9342b;
+    --live-hover: #e8473e;
+    --you: #93cde3;
+    --them: #ffd60a;
+    --ok: #58d39c;
+
+    --warn-bg: #2e2706;
+    --warn-text: #ffe680;
+    --error-bg: #351513;
+    --error-text: #ffb4ad;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  display: flex;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font: 500 13.5px/1.45 var(--font);
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+:focus {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 1px;
+}
+
+/* ---------- buttons ---------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg);
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: var(--signal);
+  border-color: var(--signal);
+  color: var(--on-signal);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.btn.small {
+  height: 26px;
+  padding: 0 10px;
+  font-size: 12.5px;
+}
+
+.text-btn {
+  border: 0;
+  background: none;
+  padding: 0;
+  color: var(--muted);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.text-btn:hover {
+  color: var(--text);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* ---------- lamps ---------- */
+
+.lamp {
+  flex: none;
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 1px;
+  background: var(--line);
+}
+
+.lamp.ok,
+.lamp.on {
+  background: var(--ok);
+}
+
+.lamp.warn {
+  background: var(--signal);
+}
+
+.lamp.error {
+  background: var(--live);
+}
+
+.lamp.pending {
+  background: none;
+  box-shadow: inset 0 0 0 1.5px var(--faint);
+}
+
+.lamp.starting {
+  background: var(--faint);
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.3;
+  }
+}
+
+/* ---------- scrollbars ---------- */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border: 2px solid transparent;
+  border-radius: 4px;
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--faint);
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-button {
+  display: none;
+}
+
+/* ---------- toasts ---------- */
+
+.toasts {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 11px;
+  border-radius: var(--radius);
+  background: var(--text);
+  color: var(--bg);
+  font-size: 12.5px;
+  pointer-events: auto;
+}
+
+.toast-text {
+  flex: 1;
+  overflow-wrap: anywhere;
+}
+
+.toast .text-btn {
+  color: inherit;
+  text-decoration: underline;
+}
+
+.toast.error {
+  background: var(--live);
+  color: #fff;
+}
+
+.toast-close {
+  border: 0;
+  background: none;
+  color: inherit;
+  opacity: 0.7;
+  font-size: 15px;
+  cursor: pointer;
+  padding: 0 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

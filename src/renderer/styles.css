@@ -1,0 +1,1071 @@
+/* The panel. Tokens and shared pieces live in theme.css. */
+
+body {
+  flex-direction: column;
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+/* ---------- head: what is happening, and nothing to press by accident ---------- */
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 6px 0 16px;
+  flex: none;
+  -webkit-app-region: drag;
+}
+
+.tally {
+  display: none;
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--live);
+}
+
+body.live .tally {
+  display: block;
+  animation: pulse 1.6s ease-in-out infinite;
+}
+
+body.paused .tally {
+  background: var(--faint);
+  animation: none;
+}
+
+.timer {
+  font: 17px/1 var(--num);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.timer:empty {
+  display: none;
+}
+
+.head-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 13.5px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body.idle .head-title {
+  color: var(--text);
+}
+
+.meters {
+  display: none;
+  flex: none;
+  gap: 10px;
+  margin-right: 4px;
+}
+
+body.live .meters {
+  display: flex;
+}
+
+.meter {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.meter-label {
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.meter.you .meter-label {
+  color: var(--you);
+}
+
+.meter.them .meter-label {
+  color: var(--them);
+}
+
+.meter-label.problem {
+  color: var(--live);
+}
+
+.meter-track {
+  width: 30px;
+  height: 8px;
+  background: var(--line);
+  overflow: hidden;
+  -webkit-mask-image: repeating-linear-gradient(90deg, #000 0 3px, transparent 3px 5px);
+  mask-image: repeating-linear-gradient(90deg, #000 0 3px, transparent 3px 5px);
+}
+
+.meter-fill {
+  display: block;
+  height: 100%;
+  transform-origin: left;
+  transform: scaleX(0);
+  transition: transform 0.09s linear;
+}
+
+.meter.you .meter-fill {
+  background: var(--you);
+}
+
+.meter.them .meter-fill {
+  background: var(--them);
+}
+
+.icon-btn {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+}
+
+.icon-btn:hover {
+  background: var(--raise-2);
+  color: var(--text);
+}
+
+/* Minimized to the title bar. A dot means an answer came in meanwhile. */
+body.minimized .context,
+body.minimized .banners,
+body.minimized .stage {
+  display: none;
+}
+
+#minBtn {
+  position: relative;
+}
+
+#minBtn .min-box,
+body.minimized #minBtn .min-line {
+  display: none;
+}
+
+body.minimized #minBtn .min-box {
+  display: inline;
+}
+
+body.answer-waiting #minBtn::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--signal);
+  box-shadow: 0 0 0 1px var(--on-signal);
+}
+
+/* ---------- context: the project and note for this call ---------- */
+
+.context {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+  min-height: 34px;
+  padding: 0 16px 6px;
+}
+
+.project-pick {
+  position: relative;
+  flex: none;
+  max-width: 62%;
+  border-radius: var(--radius);
+  background: var(--raise-2);
+}
+
+.project-pick.on {
+  background: var(--signal);
+  color: var(--on-signal);
+}
+
+.project-pick::after {
+  content: '';
+  position: absolute;
+  top: 10px;
+  right: 8px;
+  width: 6px;
+  height: 6px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(45deg) translate(-1px, -1px);
+  pointer-events: none;
+}
+
+.project-pick select {
+  appearance: none;
+  display: block;
+  width: 100%;
+  height: 26px;
+  padding: 0 24px 0 9px;
+  border: 0;
+  border-radius: var(--radius);
+  background: none;
+  font-size: 13px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.note-btn {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--faint);
+  font-size: 12.5px;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.note-btn:hover {
+  color: var(--text);
+}
+
+.note-btn.set {
+  color: var(--text);
+}
+
+.note-form {
+  flex: 1;
+  min-width: 0;
+}
+
+.note-form input {
+  width: 100%;
+  height: 26px;
+  padding: 0 8px;
+  border: 1px solid var(--signal);
+  border-radius: var(--radius);
+  background: var(--raise);
+  font-size: 13px;
+  user-select: text;
+}
+
+.note-form input:focus {
+  outline: 1px solid var(--signal);
+}
+
+/* ---------- banners ---------- */
+
+.banners {
+  display: flex;
+  flex-direction: column;
+  flex: none;
+}
+
+.banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  padding: 9px 16px;
+  background: var(--info-bg);
+  color: var(--info-text);
+  font-size: 12.5px;
+  user-select: text;
+}
+
+.banner + .banner {
+  border-top: 1px solid var(--bg);
+}
+
+.banner-text {
+  flex: 1 1 200px;
+}
+
+.banner.warn {
+  background: var(--warn-bg);
+  color: var(--warn-text);
+}
+
+.banner.error {
+  background: var(--error-bg);
+  color: var(--error-text);
+}
+
+.banner .btn {
+  color: inherit;
+  background: none;
+  border-color: currentColor;
+}
+
+.banner .btn:hover {
+  color: var(--on-signal);
+  background: var(--signal);
+  border-color: var(--signal);
+}
+
+.progress {
+  flex: 1 0 100%;
+  height: 3px;
+  background: var(--raise-2);
+  overflow: hidden;
+}
+
+.progress span {
+  display: block;
+  height: 100%;
+  background: var(--signal);
+  transform-origin: left;
+  transition: transform 0.2s;
+}
+
+/* ---------- stage ---------- */
+
+.stage {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.cue-zone {
+  position: relative;
+  flex: 1 1 0;
+  min-height: 150px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- home: before any call ---------- */
+
+.home {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 16px 18px;
+}
+
+.home-title,
+.listening-title {
+  margin: 0;
+  font: 600 30px/1.1 var(--font);
+  letter-spacing: -0.02em;
+}
+
+.home-sub,
+.listening-sub {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.listening {
+  flex: none;
+  padding: 18px 18px 8px;
+}
+
+.start {
+  width: 100%;
+  height: 40px;
+  margin-top: 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: none;
+  font-size: 14.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.start:hover,
+.start.primary {
+  border-color: var(--signal);
+  background: var(--signal);
+  color: var(--on-signal);
+}
+
+.start.primary:hover {
+  background: var(--signal-hover);
+}
+
+.checks {
+  list-style: none;
+  margin: 22px 0 0;
+  padding: 0;
+  border-top: 1px solid var(--line);
+}
+
+.check {
+  display: grid;
+  grid-template-columns: 7px auto 1fr;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  min-height: 40px;
+  padding: 5px 4px;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.check:hover {
+  background: var(--raise);
+}
+
+.check-label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.check-value {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: right;
+  color: var(--muted);
+}
+
+.check.warn .check-value {
+  color: var(--signal-text);
+  font-weight: 600;
+}
+
+/* ---------- cues: newest on top, so streaming text never moves ---------- */
+
+.cues {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 18px;
+  user-select: text;
+  overscroll-behavior: contain;
+}
+
+.cues:empty {
+  display: none;
+}
+
+.qa {
+  position: relative;
+  padding: 12px 0;
+}
+
+.qa + .qa {
+  border-top: 1px solid var(--line);
+}
+
+.qa.latest {
+  padding: 8px 0 18px;
+}
+
+.q {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.qa.latest .q {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--text);
+  font-size: 14.5px;
+  font-weight: 600;
+  cursor: default;
+}
+
+.qa:not(.latest) .q::after {
+  content: '+';
+  flex: none;
+  margin-left: auto;
+  color: var(--faint);
+  font-size: 15px;
+  line-height: 1;
+}
+
+.qa.open:not(.latest) .q::after {
+  content: '\2212';
+}
+
+.qa:not(.latest) .q:hover {
+  color: var(--text);
+}
+
+.kind {
+  flex: none;
+  color: var(--faint);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.kind:empty {
+  display: none;
+}
+
+.qa.latest .kind {
+  display: block;
+  margin-bottom: 1px;
+}
+
+.qtext {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.qa:not(.latest):not(.open) .qtext {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.a {
+  margin-top: 3px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.qa:not(.latest):not(.open) .a {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--muted);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.qa.latest .a {
+  margin-top: 0;
+  font-size: 21px;
+  font-weight: 500;
+  line-height: 1.36;
+  letter-spacing: -0.008em;
+}
+
+.qa.latest.long .a {
+  font-size: 16px;
+  line-height: 1.45;
+  letter-spacing: 0;
+}
+
+.md p {
+  margin: 0 0 0.5em;
+}
+
+.md p:last-child,
+.md ul:last-child,
+.md ol:last-child {
+  margin-bottom: 0;
+}
+
+.md ul,
+.md ol {
+  margin: 0 0 0.5em;
+  padding-left: 1.15em;
+}
+
+.md li {
+  margin: 0.2em 0;
+}
+
+.md li::marker {
+  color: var(--faint);
+}
+
+.md strong {
+  font-weight: 600;
+}
+
+/* The phrase to land on, like a highlighter on a cue card. */
+.qa.latest:not(.long) .md strong {
+  padding: 0 0.16em;
+  border-radius: 2px;
+  background: var(--signal);
+  color: var(--on-signal);
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+.md code {
+  font: 0.88em var(--mono);
+  background: var(--raise-2);
+  border-radius: 2px;
+  padding: 0 4px;
+}
+
+.qa.error .a,
+.qa.error.latest .a {
+  color: var(--error-text);
+  font-size: 15px;
+}
+
+.sources {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  margin-top: 10px;
+  font-size: 12px;
+}
+
+.sources:empty,
+.qa:not(.latest):not(.open) .sources {
+  display: none;
+}
+
+.sources-label {
+  color: var(--faint);
+  font-weight: 600;
+}
+
+.source-name {
+  padding: 1px 6px;
+  border-radius: 2px;
+  background: var(--raise-2);
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 18px;
+  margin-top: 10px;
+}
+
+.qa:not(.latest):not(.open) .meta {
+  display: none;
+}
+
+.note {
+  flex: 1;
+  color: var(--faint);
+  font: 12.5px var(--num);
+  font-variant-numeric: tabular-nums;
+}
+
+.qa.working .note {
+  color: var(--muted);
+  font-family: var(--font);
+  font-weight: 500;
+}
+
+.qa.working.latest::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 30%;
+  height: 2px;
+  background: var(--signal);
+  animation: scan 1.3s ease-in-out infinite alternate;
+}
+
+@keyframes scan {
+  to {
+    left: 70%;
+  }
+}
+
+.waiting {
+  color: var(--faint);
+  font-size: 16px;
+}
+
+/* ---------- desk: the four keys and the question box ---------- */
+
+.desk {
+  flex: none;
+  background: var(--raise);
+  border-top: 1px solid var(--line);
+}
+
+.keys {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-bottom: 1px solid var(--line);
+}
+
+.chip {
+  height: 38px;
+  padding: 0 2px;
+  border: 0;
+  border-right: 1px solid var(--line);
+  background: none;
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.chip:last-child {
+  border-right: 0;
+}
+
+.chip:hover {
+  background: var(--signal);
+  color: var(--on-signal);
+}
+
+.chip:focus-visible {
+  outline-offset: -2px;
+}
+
+.ask {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  min-height: 44px;
+  padding: 6px 8px 6px 18px;
+}
+
+.ask textarea {
+  flex: 1;
+  border: 0;
+  outline: none;
+  resize: none;
+  background: transparent;
+  padding: 6px 0;
+  max-height: 140px;
+  font-size: 14px;
+  line-height: 1.4;
+  user-select: text;
+}
+
+.ask textarea::placeholder {
+  color: var(--faint);
+}
+
+.send {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: var(--radius);
+  background: var(--signal);
+  color: var(--on-signal);
+  cursor: pointer;
+}
+
+.send:hover {
+  background: var(--signal-hover);
+}
+
+.ask:has(textarea:placeholder-shown) .send {
+  visibility: hidden;
+}
+
+/* ---------- notes: what the call came to ---------- */
+
+.call-notes {
+  flex: none;
+  max-height: 55%;
+  overflow-y: auto;
+  padding: 2px 18px 14px;
+  border-bottom: 1px solid var(--line);
+  user-select: text;
+}
+
+.call-stats {
+  margin: 0 0 8px;
+  color: var(--muted);
+  font: 13px var(--num);
+  font-variant-numeric: tabular-nums;
+}
+
+.notes-wait {
+  margin: 0;
+  color: var(--faint);
+  font-size: 15px;
+}
+
+.notes-summary {
+  margin: 0;
+  font-size: 15.5px;
+  line-height: 1.45;
+}
+
+.notes-title {
+  margin: 12px 0 3px;
+  color: var(--muted);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.notes-list {
+  margin: 0;
+  padding-left: 1.1em;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.notes-list li::marker {
+  color: var(--faint);
+}
+
+.notes-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 12px;
+}
+
+/* ---------- foot: the transcript handle and ending the call ---------- */
+
+.foot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+  height: 40px;
+  padding: 0 10px 0 16px;
+  background: var(--raise);
+  border-top: 1px solid var(--line);
+}
+
+.foot-toggle {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.foot-toggle:hover {
+  color: var(--text);
+}
+
+.chevron {
+  flex: none;
+  transition: transform 0.12s;
+}
+
+.foot.open .chevron {
+  transform: rotate(180deg);
+}
+
+.foot-label {
+  flex: none;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+/* One line of what was just heard, so it is clear it is working with the log closed. */
+.foot-last {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--faint);
+  font-size: 12.5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.foot.open .foot-last {
+  display: none;
+}
+
+.backlog {
+  flex: none;
+  color: var(--muted);
+  font: 12px var(--num);
+}
+
+.btn.danger:hover {
+  background: var(--live);
+  border-color: var(--live);
+  color: #fff;
+}
+
+.foot .text-btn.on {
+  color: var(--text);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.notepad {
+  flex: 0 0 36%;
+  min-height: 96px;
+  display: flex;
+  background: var(--raise);
+}
+
+.notepad textarea {
+  flex: 1;
+  border: 0;
+  outline: none;
+  resize: none;
+  padding: 10px 16px;
+  background: transparent;
+  font-size: 14px;
+  line-height: 1.5;
+  user-select: text;
+}
+
+.notepad textarea::placeholder {
+  color: var(--faint);
+}
+
+/* ---------- log: the transcript, only when asked for ---------- */
+
+.divider {
+  flex: none;
+  height: 5px;
+  background: var(--raise);
+  cursor: row-resize;
+}
+
+.divider:hover {
+  background: var(--raise-2);
+}
+
+.log {
+  position: relative;
+  flex: 0 0 36%;
+  min-height: 96px;
+  display: flex;
+  flex-direction: column;
+  background: var(--raise);
+}
+
+.lines {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 4px 16px 12px;
+  user-select: text;
+  overscroll-behavior: contain;
+}
+
+.empty {
+  padding: 4px 0;
+  color: var(--faint);
+}
+
+.line {
+  display: grid;
+  grid-template-columns: 36px 34px 1fr;
+  column-gap: 6px;
+  padding: 2px 0;
+  font-size: 13px;
+  line-height: 1.42;
+}
+
+.line + .line:not(.cont) {
+  margin-top: 6px;
+}
+
+.line .t {
+  color: var(--faint);
+  font: 12px/18.5px var(--num);
+  font-variant-numeric: tabular-nums;
+}
+
+.line .who {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 18.5px;
+}
+
+.line.you .who {
+  color: var(--you);
+}
+
+.line.them .who {
+  color: var(--them);
+}
+
+.line.you .text {
+  color: var(--muted);
+}
+
+.line.cont .who,
+.line.cont .t {
+  visibility: hidden;
+}
+
+.line.cont:hover .t {
+  visibility: visible;
+}
+
+.jump {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 26px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--radius);
+  background: var(--text);
+  color: var(--bg);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Before a call there is nothing to log or summarise. */
+body.idle .keys,
+body.idle .foot {
+  display: none;
+}
+
+body.before .foot-toggle {
+  visibility: hidden;
+}
+
+/* Narrow panel: the meters give way to the app name staying readable. */
+@media (max-width: 380px) {
+  .cues,
+  .home,
+  .listening,
+  .lines {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .ask {
+    padding-left: 14px;
+  }
+
+  .chip {
+    font-size: 11.5px;
+  }
+
+  .meter-track {
+    width: 18px;
+  }
+
+  .qa.latest .a {
+    font-size: 19px;
+  }
+}

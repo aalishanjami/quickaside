@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'" />
+    <title>Callaside prompt</title>
+    <link rel="stylesheet" href="theme.css" />
+    <link rel="stylesheet" href="prompt.css" />
+  </head>
+  <body>
+    <span class="tally" aria-hidden="true"></span>
+    <div class="words">
+      <strong id="title">Call detected</strong>
+      <span id="sub">Start Callaside?</span>
+      <span class="pick" id="pick" hidden>
+        <select id="project" aria-label="Project for this call"></select>
+      </span>
+    </div>
+    <button class="start" id="start" type="button">Start</button>
+    <button class="close" id="dismiss" type="button" title="Not this call" aria-label="Not this call">
+      <svg viewBox="0 0 20 20" width="13" height="13" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square">
+        <path d="M5 5l10 10M15 5L5 15" />
+      </svg>
+    </button>
+    <script src="ui.js"></script>
+    <script src="prompt.js"></script>
+  </body>
+</html>
