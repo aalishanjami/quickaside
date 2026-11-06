@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="setup.css" />
   </head>
   <body>
-    <div class="drag-strip" aria-hidden="true"></div>
     <ol class="steps" id="steps" aria-label="Setup steps"></ol>
 
     <main class="stage">
@@ -27,7 +26,7 @@
 
       <section data-step="claude" hidden>
         <h1>Connect Claude Code.</h1>
-        <p class="lede">Answers come from Claude Code on this Mac, using your own Claude plan.</p>
+        <p class="lede">Answers come from Claude Code on this Mac, using your own Claude plan. The speech model downloads while you do this.</p>
         <div class="check" id="claudeCheck">
           <span class="lamp starting" id="claudeLamp"></span>
           <span id="claudeStatus">Checking</span>
@@ -40,20 +39,6 @@
           </div>
           <button class="btn" id="claudeRetry" type="button">Check again</button>
         </div>
-      </section>
-
-      <section data-step="speech" hidden>
-        <h1>Download the speech model.</h1>
-        <p class="lede">Speech recognition runs on this Mac, so this is a one-time download.</p>
-        <div class="check">
-          <span class="lamp" id="modelLamp"></span>
-          <span id="modelStatus"></span>
-        </div>
-        <div class="progress" id="modelProgress" hidden><span id="modelFill"></span></div>
-        <div class="actions">
-          <button class="btn" id="modelDownload" type="button" hidden>Download</button>
-        </div>
-        <p class="fine">You can pick a smaller, faster model later in Settings.</p>
       </section>
 
       <section data-step="access" hidden>
@@ -73,21 +58,13 @@
         </div>
       </section>
 
-      <section data-step="knowledge" hidden>
-        <h1>Point it at your notes.</h1>
-        <p class="lede">Answers can only claim what your notes say. You can skip this and add them later.</p>
-        <div class="path-row">
-          <span class="path unset" id="folderPath">No folder chosen</span>
-          <button class="btn" id="pickFolder" type="button">Choose folder</button>
-        </div>
-        <p class="fine">Claude reads from this folder only when a question needs it. Then you can press Suggest projects in Settings to set up your clients.</p>
-      </section>
     </main>
 
     <footer class="foot">
       <button class="text-btn" id="back" type="button">Back</button>
+      <span class="model-line" id="modelLine" aria-live="polite"></span>
+      <button class="text-btn" id="modelRetry" type="button" hidden>Try again</button>
       <span class="spacer"></span>
-      <button class="text-btn" id="skip" type="button" hidden>Skip for now</button>
       <button class="next" id="next" type="button">Continue</button>
     </footer>
 

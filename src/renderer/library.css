@@ -1,19 +1,11 @@
-/* The Past calls window. */
-
-.drag-strip {
-  position: fixed;
-  inset: 0 0 auto;
-  height: 38px;
-  z-index: 5;
-  -webkit-app-region: drag;
-}
+/* The Past calls page. */
 
 .side {
   flex: none;
   display: flex;
   flex-direction: column;
-  width: 290px;
-  padding: 48px 0 0;
+  width: 270px;
+  padding: 6px 0 0;
   background: var(--raise);
 }
 
@@ -52,6 +44,10 @@ input:focus {
   padding: 0;
   list-style: none;
   border-top: 1px solid var(--line);
+}
+
+.list[hidden] {
+  display: none;
 }
 
 .item {
@@ -110,7 +106,7 @@ input:focus {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  padding-top: 40px;
+  padding-top: 6px;
 }
 
 .ask {

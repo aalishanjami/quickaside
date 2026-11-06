@@ -96,11 +96,12 @@ To undo it, delete that folder. The next build goes back to ad-hoc signing. Keep
 | `src/main/transcript.js` | Orders lines, drops mic echoes, writes the markdown file |
 | `scripts/call-detector.swift`, `src/main/call-detector.js` | Sees which app has the microphone open and turns that into call started and ended |
 | `src/main/claude.js` | Keeps one `claude -p --input-format stream-json` process per call and streams answers |
-| `src/main/assist.js` | The spark buttons: drafts settings from your knowledge |
+| `src/main/assist.js` | Fill in for me, Find my projects and the spark buttons |
+| `src/main/claude-memory.js` | Reads Claude Code's memory files, only when a button asks for it |
+| `src/main/window-layout.js` | The one window's shapes: panel, wide and setup |
 | `src/main/notes.js` | The notes written after each call |
 | `src/main/calls.js` | The call library, search and talk time |
 | `scripts/calendar-helper.swift`, `src/main/calendar.js` | Finds the event you are in and the project it matches |
-| `src/main/knowledge.js` | The overview on the Knowledge page |
 | `src/main/prompts.js` | System prompt and per-question message |
 
 ## Licence

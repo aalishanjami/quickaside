@@ -1,52 +1,30 @@
 'use strict';
 
-const MIN_WIDTH = 640;
-const MAX_WIDTH = 880;
-const MIN_HEIGHT = 480;
-const MAX_HEIGHT = 680;
-const GAP = 16;
-
-// Where the settings window goes, given the panel and the screen it is on.
-// The panel floats above everything, so settings sits beside it when it can.
-// `clear` is false when there is no room, and the caller must then float it too.
-function settingsBounds(panel, workArea) {
-  const left = panel.x - workArea.x;
-  const right = workArea.x + workArea.width - (panel.x + panel.width);
-  const side = Math.max(left, right);
-  const width = Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, side - 2 * GAP));
-  const height = Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, workArea.height - 80));
-  const clear = side >= width + GAP;
-  let x;
-  if (!clear) x = workArea.x + Math.round((workArea.width - width) / 2);
-  else if (left >= right) x = workArea.x + Math.round((left - width) / 2);
-  else x = panel.x + panel.width + Math.round((right - width) / 2);
-  const y = workArea.y + Math.round((workArea.height - height) / 2);
-  return { x, y, width, height, clear };
-}
+// There is one window. It is the narrow panel on a call, and grows into a normal
+// app window with a sidebar between calls.
 
 const PANEL_WIDTH = 420;
 const PANEL_HEIGHT = 720;
 const PANEL_MIN_WIDTH = 340;
 const PANEL_MIN_HEIGHT = 440;
-const PANEL_BAR_HEIGHT = 44; // minimized: the title bar and nothing else
+const HEAD_HEIGHT = 44; // the title bar, which is also the whole panel when shrunk to a bar
+const RAIL_WIDTH = 176;
+const WIDE_WIDTH = 1040;
+const WIDE_HEIGHT = 700;
+const WIDE_MIN_WIDTH = 760;
+const WIDE_MIN_HEIGHT = 520;
+const SETUP_WIDTH = 560;
+const SETUP_HEIGHT = 680;
 const PROMPT_WIDTH = 340;
 const PROMPT_HEIGHT = 72;
 const MARGIN = 12;
 
-function centeredBounds(workArea) {
-  const width = Math.max(MIN_WIDTH, Math.min(880, workArea.width - 32));
-  const height = Math.max(MIN_HEIGHT, Math.min(680, workArea.height - 32));
-  return {
-    x: workArea.x + Math.round((workArea.width - width) / 2),
-    y: workArea.y + Math.round((workArea.height - height) / 2),
-    width,
-    height,
-    clear: true,
-  };
-}
-
 function contains(area, x, y) {
   return x >= area.x && x < area.x + area.width && y >= area.y && y < area.y + area.height;
+}
+
+function clamp(value, low, high) {
+  return Math.max(low, Math.min(value, high));
 }
 
 // Top right, close to the webcam. A saved position wins while it is still on a
@@ -65,6 +43,46 @@ function panelBounds(workArea, saved, allAreas = [workArea]) {
   };
 }
 
+function nearRightEdge(rect, workArea) {
+  return rect.x + rect.width / 2 > workArea.x + workArea.width / 2;
+}
+
+// The window grows out from the side of the screen the panel is on, so it stays
+// on screen and the panel can come back to the same place.
+function wideBounds(panel, workArea, size) {
+  const width = Math.min(workArea.width, Math.max(WIDE_MIN_WIDTH, (size && size.width) || WIDE_WIDTH));
+  const height = Math.min(workArea.height, Math.max(WIDE_MIN_HEIGHT, (size && size.height) || Math.max(WIDE_HEIGHT, panel.height)));
+  const x = nearRightEdge(panel, workArea) ? panel.x + panel.width - width : panel.x;
+  return {
+    x: clamp(x, workArea.x, workArea.x + workArea.width - width),
+    y: clamp(panel.y, workArea.y, workArea.y + workArea.height - height),
+    width,
+    height,
+  };
+}
+
+// Back to the panel from wherever the wide window was moved to.
+function panelFromWide(wide, panel, workArea) {
+  const x = nearRightEdge(wide, workArea) ? wide.x + wide.width - panel.width : wide.x;
+  return {
+    x: clamp(x, workArea.x, workArea.x + workArea.width - panel.width),
+    y: clamp(wide.y, workArea.y, workArea.y + workArea.height - panel.height),
+    width: panel.width,
+    height: panel.height,
+  };
+}
+
+function setupBounds(workArea) {
+  const width = Math.min(SETUP_WIDTH, workArea.width);
+  const height = Math.min(SETUP_HEIGHT, workArea.height);
+  return {
+    x: workArea.x + Math.round((workArea.width - width) / 2),
+    y: workArea.y + Math.round((workArea.height - height) / 2),
+    width,
+    height,
+  };
+}
+
 function promptBounds(workArea) {
   return {
     x: workArea.x + workArea.width - PROMPT_WIDTH - MARGIN,
@@ -75,13 +93,15 @@ function promptBounds(workArea) {
 }
 
 module.exports = {
-  settingsBounds,
-  centeredBounds,
   panelBounds,
+  wideBounds,
+  panelFromWide,
+  setupBounds,
   promptBounds,
-  MIN_WIDTH,
-  MIN_HEIGHT,
   PANEL_MIN_WIDTH,
   PANEL_MIN_HEIGHT,
-  PANEL_BAR_HEIGHT,
+  HEAD_HEIGHT,
+  RAIL_WIDTH,
+  WIDE_MIN_WIDTH,
+  WIDE_MIN_HEIGHT,
 };

@@ -1,6 +1,6 @@
 'use strict';
 
-// Small helpers shared by the panel and the settings window.
+// Small helpers shared by the pages.
 window.ui = (() => {
   function el(tag, cls, text) {
     const e = document.createElement(tag);
@@ -52,6 +52,15 @@ window.ui = (() => {
     return projects.filter((p) => p.name.trim() || p.brief.trim() || p.folder || p.files.length);
   }
 
+  // A client from a call may already be a project under a longer or shorter name.
+  function hasProject(projects, name) {
+    const wanted = String(name).trim().toLowerCase();
+    return projects.some((p) => {
+      const known = p.name.trim().toLowerCase();
+      return known && (known.includes(wanted) || wanted.includes(known));
+    });
+  }
+
   // Rebuilt only when the list changes, because that closes the menu if it is open.
   function fillProjects(select, projects, active, extra = []) {
     const shown = usableProjects(projects);
@@ -71,5 +80,5 @@ window.ui = (() => {
     if (select.value !== value) select.value = value; // setting it at all closes an open menu
   }
 
-  return { el, basename, tildify, modelName, toast, usableProjects, fillProjects };
+  return { el, basename, tildify, modelName, toast, usableProjects, hasProject, fillProjects };
 })();

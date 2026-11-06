@@ -1,68 +1,9 @@
-/* The settings window. Tokens and shared pieces live in theme.css. */
 
-.drag-strip {
-  position: fixed;
-  inset: 0 0 auto;
-  height: 38px;
-  z-index: 5;
-  -webkit-app-region: drag;
-}
-
-/* ---------- sidebar ---------- */
-
-.side {
-  flex: none;
-  display: flex;
-  flex-direction: column;
-  width: 204px;
-  padding: 56px 10px 14px;
-  background: var(--raise);
-}
-
-.nav {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.nav-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  height: 38px;
-  padding: 0 10px;
-  border: 0;
-  border-radius: var(--radius);
-  background: none;
-  color: var(--muted);
-  font-size: 14.5px;
-  font-weight: 600;
-  text-align: left;
-  cursor: pointer;
-}
-
-.nav-item svg {
-  flex: none;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.5;
-}
-
-.nav-item:hover {
-  background: var(--raise-2);
-  color: var(--text);
-}
-
-.nav-item[aria-current='page'] {
-  background: var(--signal);
-  color: var(--on-signal);
-}
 
 .about {
   display: flex;
-  flex-direction: column;
-  margin: auto 0 0;
-  padding: 0 10px;
+  gap: 12px;
+  margin: 0;
   color: var(--faint);
   font-size: 12px;
   line-height: 1.5;
@@ -80,7 +21,44 @@
 .page {
   max-width: 640px;
   margin: 0 auto;
-  padding: 56px 44px 72px;
+  padding: 18px 44px 72px;
+}
+
+.part + .part {
+  margin-top: 44px;
+}
+
+.connector {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-left: 14px;
+  border-left: 2px solid var(--line);
+}
+
+.report-box summary {
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.report-box textarea {
+  margin-top: 10px;
+}
+
+.paste {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.paste[hidden] {
+  display: none;
+}
+
+.paste textarea {
+  width: 100%;
 }
 
 .page h1 {
@@ -439,274 +417,6 @@ input.mono {
   transform: translateX(18px);
 }
 
-/* ---------- choices ---------- */
-
-.seg {
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(0, 1fr);
-  gap: 8px;
-}
-
-.seg-item {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  padding: 11px 13px;
-  border-radius: var(--radius);
-  background: var(--raise);
-  box-shadow: inset 0 0 0 1px var(--line);
-  cursor: pointer;
-}
-
-.seg-item:hover {
-  box-shadow: inset 0 0 0 1px var(--faint);
-}
-
-.seg-item input {
-  position: absolute;
-  inset: 0;
-  margin: 0;
-  opacity: 0;
-  cursor: pointer;
-}
-
-.seg-item:has(input:checked) {
-  background: var(--signal);
-  box-shadow: none;
-  color: var(--on-signal);
-}
-
-.seg-item:has(input:focus-visible) {
-  outline: 2px solid var(--signal);
-  outline-offset: 2px;
-}
-
-.seg-title {
-  font-size: 15px;
-  font-weight: 600;
-}
-
-.seg-sub {
-  color: var(--muted);
-  font-size: 13px;
-}
-
-.seg-note {
-  margin-top: 8px;
-  color: var(--muted);
-  font-size: 12.5px;
-  line-height: 1.4;
-}
-
-.seg-item:has(input:checked) .seg-sub,
-.seg-item:has(input:checked) .seg-note {
-  color: var(--on-signal);
-  opacity: 0.78;
-}
-
-.seg-item.tall {
-  gap: 1px;
-}
-
-.seg-item.tall .seg-state,
-.seg-item.tall .btn {
-  position: relative;
-  align-self: flex-start;
-  margin-top: auto;
-}
-
-.seg-item.tall .seg-note {
-  margin-bottom: 12px;
-}
-
-.seg-state {
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--muted);
-}
-
-.seg-state.ok {
-  color: var(--ok);
-}
-
-.seg-item:has(input:checked) .seg-state {
-  color: var(--on-signal);
-}
-
-/* ---------- knowledge ---------- */
-
-.tiles {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1px;
-  margin-bottom: 8px;
-  border-block: 1px solid var(--line);
-  background: var(--line);
-}
-
-.tile {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 14px 14px 14px 0;
-  border: 0;
-  background: var(--bg);
-  text-align: left;
-}
-
-.tile + .tile {
-  padding-left: 14px;
-}
-
-button.tile {
-  cursor: pointer;
-}
-
-button.tile:hover .tile-num {
-  color: var(--signal-text);
-}
-
-.tile-num {
-  font: 34px/1 var(--num);
-  font-variant-numeric: tabular-nums;
-}
-
-.tile-label {
-  color: var(--muted);
-  font-size: 12.5px;
-  line-height: 1.35;
-}
-
-.source {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  padding: 24px 0;
-  border-bottom: 1px solid var(--line);
-}
-
-.source h2 {
-  margin: 0;
-  font: 600 19px/1.2 var(--font);
-  letter-spacing: -0.01em;
-}
-
-.scan {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.facts {
-  display: flex;
-  gap: 32px;
-  margin: 0;
-}
-
-.facts div {
-  display: flex;
-  flex-direction: column;
-}
-
-.facts dd {
-  margin: 0;
-  font: 22px/1.1 var(--num);
-  font-variant-numeric: tabular-nums;
-}
-
-.facts dt {
-  color: var(--muted);
-  font-size: 12.5px;
-}
-
-.bars {
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.bars li {
-  display: grid;
-  grid-template-columns: minmax(0, 170px) 1fr 44px;
-  align-items: center;
-  gap: 12px;
-  font-size: 13.5px;
-}
-
-.bar-name {
-  overflow: hidden;
-  font-weight: 600;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.bar-track {
-  height: 6px;
-  background: var(--raise-2);
-}
-
-.bar-fill {
-  display: block;
-  height: 100%;
-  background: var(--signal);
-  transform-origin: left;
-}
-
-.bar-count {
-  color: var(--muted);
-  font: 13px var(--num);
-  font-variant-numeric: tabular-nums;
-  text-align: right;
-}
-
-.budget {
-  height: 6px;
-  background: var(--raise-2);
-}
-
-.budget span {
-  display: block;
-  height: 100%;
-  background: var(--signal);
-  transform-origin: left;
-  transform: scaleX(0);
-}
-
-.summary {
-  margin: 0;
-  font-size: 15.5px;
-  line-height: 1.5;
-  user-select: text;
-}
-
-.summary.unset {
-  color: var(--faint);
-  font-size: 14px;
-}
-
-.topics {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.topics:empty {
-  display: none;
-}
-
-.topic {
-  padding: 3px 8px;
-  border-radius: var(--radius);
-  background: var(--raise);
-  font-size: 13px;
-  font-weight: 600;
-}
-
 /* ---------- help ---------- */
 
 textarea.report {
@@ -900,20 +610,9 @@ textarea.report {
 }
 
 @media (max-width: 760px) {
-  .side {
-    width: 168px;
-  }
 
   .page {
     padding-left: 28px;
     padding-right: 28px;
-  }
-
-  .seg:has(.tall) {
-    grid-auto-flow: row;
-  }
-
-  .tile-num {
-    font-size: 28px;
   }
 }

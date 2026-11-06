@@ -17,7 +17,7 @@ function templateOf(id) {
   return NOTE_TEMPLATES[id] ? id : 'general';
 }
 
-function buildNotes({ record, template, aboutMe, instructions, brief }) {
+function buildNotes({ record, template, aboutMe, instructions, brief, knownClients = [] }) {
   const t = NOTE_TEMPLATES[templateOf(template)];
   const system = [
     "You write up the user's call. The user may send these notes to the other person, so every claim has to come from the transcript, the user's notes or <project>.",
@@ -39,6 +39,12 @@ function buildNotes({ record, template, aboutMe, instructions, brief }) {
   parts.push('- "decisions": an array of strings, only what was actually agreed. Empty if nothing was.');
   parts.push('- "actions": an array of objects with "task" and "owner". Owner is "You", "Them" or a name that was said.');
   parts.push('- "followUp": a string, a short follow-up email from the user in the first person, with no subject line. Empty if a follow-up makes no sense.');
+  // A call with no project may be the first sign of a client, so the app can offer to save one.
+  if (!record.project) {
+    const known = knownClients.filter(Boolean).join(', ');
+    parts.push(`- "client": a string, the outside company or client this call was with, only if the name was clearly said. Not the user's own company${known ? `, and none of: ${known}` : ''}. Empty otherwise.`);
+    parts.push('- "brief": a string, short plain lines for later calls with them: who they are, what they want, where it stands. Empty if "client" is empty.');
+  }
   return { system: system.join('\n'), prompt: parts.join('\n') };
 }
 
@@ -66,6 +72,7 @@ function parseNotes(text) {
     followUp: str(raw.followUp),
   };
   if (!notes.summary) throw new Error('Claude did not return notes. Try again.');
+  if (str(raw.client)) Object.assign(notes, { client: str(raw.client).slice(0, 120), brief: str(raw.brief) });
   return notes;
 }
 

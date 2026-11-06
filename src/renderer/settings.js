@@ -11,7 +11,7 @@
     missing: 'This folder no longer exists, so answers skip it. Choose another one.',
   };
 
-  const PROFILE_FIELDS = ['aboutMe', 'offer', 'audience', 'instructions'];
+  const PROFILE_FIELDS = ['aboutMe', 'offer', 'audience'];
 
   // whisper reads this much of the vocabulary as its prompt (see whisperConfig).
   const TERM_LIMIT = 600;
@@ -19,11 +19,6 @@
   const state = {
     settings: null,
     status: null,
-    models: [],
-    testMode: false,
-    download: null,
-    knowledge: null,
-    knowledgeSeq: 0,
     drafting: false,
     newTerms: new Set(),
     connector: null,
@@ -33,28 +28,20 @@
 
   // ---------- sections ----------
 
+  // Two pages: Projects, and one that scrolls through You, Calls and Help.
   function showSection(name) {
-    const pages = [...document.querySelectorAll('[data-page]')];
-    const target = pages.some((p) => p.dataset.page === name) ? name : 'you';
-    for (const p of pages) p.hidden = p.dataset.page !== target;
-    for (const b of document.querySelectorAll('.nav-item')) {
-      if (b.dataset.section === target) b.setAttribute('aria-current', 'page');
-      else b.removeAttribute('aria-current');
-    }
+    const projects = name === 'projects';
+    for (const p of document.querySelectorAll('[data-page]')) p.hidden = p.dataset.page !== (projects ? 'projects' : 'settings');
     $('content').scrollTop = 0;
-    if (target === 'listening') refreshMicList();
-    if (target === 'knowledge') refreshKnowledge();
-    if (target === 'help') refreshReport();
-    if (target === 'connect') refreshConnector();
+    if (projects) return;
+    refreshConnector();
+    const part = $(`part-${name}`);
+    if (part && name !== 'you') part.scrollIntoView();
   }
 
   async function refreshReport() {
     const { summary, log } = await api.report();
     $('reportText').value = `${summary}\n\n${log || '(the log is empty)'}`;
-  }
-
-  function onPage(name) {
-    return !document.querySelector(`[data-page="${name}"]`).hidden;
   }
 
   // ---------- connect ----------
@@ -70,14 +57,11 @@
   function renderConnector() {
     const on = !!state.settings.connector;
     $('connectorTargets').hidden = !on;
-    $('connectorTips').hidden = !on;
     const c = state.connector;
     if (!c) return;
     $('connectorCodeStatus').textContent = CODE_STATUS[c.claudeCode];
     $('connectorCode').textContent = c.claudeCode === 'connected' ? 'Disconnect' : 'Connect';
     $('connectorCode').disabled = c.claudeCode === 'missing';
-    const saved = c.calls === 1 ? '1 saved call' : `${c.calls} saved calls`;
-    $('connectorHelp').textContent = `${saved}, with transcripts and notes. Claude can't change or delete anything here.`;
   }
 
   async function refreshConnector() {
@@ -110,107 +94,24 @@
       if (input.type === 'checkbox') input.checked = !!s[key];
       else if (document.activeElement !== input) input.value = s[key] ?? '';
     }
-    for (const radio of document.querySelectorAll('.seg input[type="radio"]')) {
-      if (radio.name in s) radio.checked = s[radio.name] === radio.value;
-    }
-    renderKnowledge();
+    renderFiles();
     renderTerms();
     // Rebuilding the list mid-typing would throw away the cursor.
     if (!$('projectList').contains(document.activeElement)) renderProjects();
     $('contextFolderPath').textContent = s.contextFolder ? tildify(s.contextFolder) : 'No folder chosen';
     $('contextFolderPath').classList.toggle('unset', !s.contextFolder);
+    $('clearNotes').hidden = !s.contextFolder;
     $('saveFolderPath').textContent = tildify(s.saveFolder);
     renderConnector();
-    renderModels();
   }
 
-  // ---------- knowledge ----------
-
-  async function refreshKnowledge() {
-    const seq = ++state.knowledgeSeq;
-    const k = await api.knowledge();
-    if (seq !== state.knowledgeSeq) return;
-    state.knowledge = k;
-    renderKnowledge();
-  }
-
-  function ago(ms) {
-    const mins = Math.floor((Date.now() - ms) / 60000);
-    if (mins < 60) return mins <= 1 ? 'just now' : `${mins} minutes ago`;
-    const hours = Math.floor(mins / 60);
-    if (hours < 24) return `${hours} hour${hours === 1 ? '' : 's'} ago`;
-    const days = Math.floor(hours / 24);
-    return `${days} day${days === 1 ? '' : 's'} ago`;
-  }
-
-  function fileSize(bytes) {
-    if (bytes < 1024) return `${bytes} B`;
-    return bytes < 1024 * 1024 ? `${Math.round(bytes / 1024)} KB` : `${(bytes / 1024 / 1024).toFixed(1)} MB`;
-  }
-
-  function renderKnowledge() {
-    const s = state.settings;
-    const scan = state.knowledge && state.knowledge.scan;
-    const filled = PROFILE_FIELDS.filter((f) => s[f] && s[f].trim()).length;
-    $('kProfile').textContent = `${filled}/${PROFILE_FIELDS.length}`;
-    $('kContext').textContent = String(s.contextFiles.length);
-    const notes = state.status && state.status.notes;
-    $('kNotes').textContent = !s.folderAccess || !s.contextFolder ? 'Off' : scan ? scan.files.toLocaleString() : notes === 'ok' ? '...' : '0';
-    renderScan(s.folderAccess ? scan : null);
-    renderFiles();
-    $('kSummary').textContent = s.knowledgeSummary || 'Press the spark for a quick read of what is in here.';
-    $('kSummary').classList.toggle('unset', !s.knowledgeSummary);
-    $('kTopics').replaceChildren(...s.knowledgeTopics.map((t) => el('span', 'topic', t)));
-  }
-
-  function renderScan(scan) {
-    $('folderScan').hidden = !scan;
-    if (!scan) return;
-    const facts = [
-      ['Notes', scan.partial ? `${scan.files.toLocaleString()}+` : scan.files.toLocaleString()],
-      ['Folders', scan.folders.toLocaleString()],
-      ['Edited this week', scan.recent.toLocaleString()],
-    ];
-    const box = $('folderFacts');
-    box.replaceChildren();
-    for (const [label, value] of facts) {
-      const row = el('div');
-      row.appendChild(el('dd', null, value));
-      row.appendChild(el('dt', null, label));
-      box.appendChild(row);
-    }
-    const most = scan.top.length ? scan.top[0].count : 1;
-    const bars = $('folderTop');
-    bars.replaceChildren();
-    for (const { name, count } of scan.top) {
-      const li = el('li');
-      li.appendChild(el('span', 'bar-name', name));
-      const track = el('span', 'bar-track');
-      const fill = el('span', 'bar-fill');
-      fill.style.transform = `scaleX(${count / most})`;
-      track.appendChild(fill);
-      li.appendChild(track);
-      li.appendChild(el('span', 'bar-count', count.toLocaleString()));
-      bars.appendChild(li);
-    }
-    const types = scan.types.map((t) => `${t.count.toLocaleString()} ${t.name}`).join(', ');
-    const latest = scan.latest ? `Last edit: ${scan.latest.name}, ${ago(scan.latest.mtimeMs)}.` : '';
-    $('folderTypes').textContent = [types && `${types}.`, latest].filter(Boolean).join(' ');
-  }
-
-  const FILE_STATES = {
-    cut: 'Cut at 40,000 characters',
-    'left-out': 'Left out, over the limit',
-    missing: 'File not found',
-  };
+  // ---------- files ----------
 
   function renderFiles() {
     const list = $('contextFiles');
     const files = state.settings.contextFiles;
-    const context = state.knowledge && state.knowledge.context;
     list.replaceChildren();
-    files.forEach((f, i) => {
-      const info = context && context.files[i];
+    for (const f of files) {
       const li = el('li');
       li.title = f;
       const text = el('button', 'file-text');
@@ -219,53 +120,45 @@
       text.appendChild(el('span', 'file-name', basename(f)));
       text.appendChild(el('span', 'file-path', tildify(f)));
       li.appendChild(text);
-      if (info) {
-        const issue = FILE_STATES[info.state];
-        li.appendChild(el('span', `file-state${issue ? ' warn' : ''}`, issue || fileSize(info.size)));
-      }
       const rm = el('button', 'text-btn', 'Remove');
       rm.type = 'button';
       rm.onclick = () => save({ contextFiles: state.settings.contextFiles.filter((x) => x !== f) });
       li.appendChild(rm);
       list.appendChild(li);
-    });
+    }
     list.hidden = !files.length;
-    const hasBudget = !!(context && files.length);
-    $('budget').hidden = !hasBudget;
-    if (hasBudget) $('budgetFill').style.transform = `scaleX(${Math.min(1, context.used / context.limit)})`;
-    $('budgetText').textContent = hasBudget
-      ? `${context.used.toLocaleString()} of ${context.limit.toLocaleString()} characters used. Each file is cut at 40,000.`
-      : files.length
-        ? ''
-        : 'No files yet. Add the few that matter on most calls.';
   }
 
   // ---------- spark drafts ----------
 
   function setDrafting(on, button) {
     state.drafting = on;
-    for (const b of document.querySelectorAll('.spark, #draftAll, #suggestProjects')) b.disabled = on;
+    for (const b of document.querySelectorAll('.spark, #draftAll, #suggestProjects, #pasteForm button')) b.disabled = on;
     if (button) button.classList.toggle('busy', on);
     $('draftBar').hidden = !on;
-    $('draftText').textContent = 'Reading your knowledge';
+    $('draftText').textContent = 'Reading your notes and Claude Code memory';
   }
 
-  async function draft(fields, button, project) {
+  async function draft(fields, button, project, pasted) {
     if (state.drafting) return null;
     flush();
     setDrafting(true, button);
-    const r = await api.draft(fields, project);
+    const r = await api.draft(fields, project, pasted);
     setDrafting(false, button);
     if (r.ok) return r;
     if (r.cancelled) return null;
-    if (r.code === 'no-sources') toast(r.error, { action: { label: 'Open Knowledge', run: () => showSection('knowledge') } });
-    else toast(r.error || 'Could not draft that.', { level: 'error', timeout: 9000 });
+    toast(r.error || 'Could not draft that.', { level: 'error', timeout: 9000 });
     return null;
   }
 
-  function usedNotes(files) {
-    if (!files.length) return '';
-    return ` Used ${files.length} note${files.length === 1 ? '' : 's'}.`;
+  // What a draft read, so it is clear where the words came from.
+  function usedSources(r) {
+    const count = (n, one, many) => (n === 1 ? `1 ${one}` : `${n} ${many}`);
+    const parts = [];
+    if (r.files.length) parts.push(count(r.files.length, 'note', 'notes'));
+    if (r.memory) parts.push(count(r.memory, 'Claude Code memory', 'Claude Code memories'));
+    if (r.calls) parts.push(count(r.calls, 'past call', 'past calls'));
+    return parts.length ? ` Used ${parts.join(', ')}.` : '';
   }
 
   function flash(key) {
@@ -288,12 +181,12 @@
     }
     const keys = Object.keys(patch);
     if (!keys.length) {
-      toast('Nothing new for this in your knowledge yet.');
+      toast('Nothing new to add yet.');
       return;
     }
     save(patch);
     keys.forEach(flash);
-    toast(`Drafted ${keys.length === 1 ? 'this' : `${keys.length} fields`}. Check it reads right.${usedNotes(r.files)}`, {
+    toast(`Drafted ${keys.length === 1 ? 'this' : `${keys.length} fields`}. Check it reads right.${usedSources(r)}`, {
       timeout: 12000,
       action: { label: 'Undo', run: () => save(undo) },
     });
@@ -307,12 +200,12 @@
     const known = new Set(current.map((t) => t.toLowerCase()));
     const found = r.values.vocabulary.filter((t) => !known.has(t.toLowerCase()));
     if (!found.length) {
-      toast('No new names or terms in your knowledge.');
+      toast('No new names or terms found.');
       return;
     }
     state.newTerms = new Set(found);
     setTerms([...current, ...found]);
-    toast(`Added ${found.length} name${found.length === 1 ? '' : 's'} and terms.${usedNotes(r.files)}`, {
+    toast(`Added ${found.length} name${found.length === 1 ? '' : 's'} and terms.${usedSources(r)}`, {
       timeout: 12000,
       action: {
         label: 'Undo',
@@ -322,17 +215,6 @@
         },
       },
     });
-  }
-
-  async function draftKnowledge(button) {
-    const r = await draft(['knowledge'], button);
-    if (!r) return;
-    const { summary, topics } = r.values.knowledge;
-    if (!summary) {
-      toast('There was nothing to sum up yet.');
-      return;
-    }
-    save({ knowledgeSummary: summary, knowledgeTopics: topics });
   }
 
   // ---------- projects ----------
@@ -430,8 +312,8 @@
     briefHead.appendChild(briefLabel);
     const spark = el('button', 'spark');
     spark.type = 'button';
-    spark.title = 'Draft from your knowledge';
-    spark.setAttribute('aria-label', 'Draft this brief from your knowledge');
+    spark.title = 'Draft this for me';
+    spark.setAttribute('aria-label', 'Draft this brief for me');
     spark.appendChild(sparkIcon());
     spark.onclick = () => draftBrief(p.id, spark);
     briefHead.appendChild(spark);
@@ -448,28 +330,30 @@
     briefField.appendChild(brief);
     body.appendChild(briefField);
 
-    const folderField = el('div', 'project-field');
-    folderField.appendChild(el('span', 'field-title', 'Folder'));
-    folderField.appendChild(el('span', 'field-help', 'Searched before the rest of your notes.'));
-    const row = el('div', 'path-row');
-    const path = el('span', `path${p.folder ? '' : ' unset'}`, p.folder ? tildify(p.folder) : 'No folder');
-    path.title = p.folder;
-    row.appendChild(path);
-    if (p.folder) {
-      const clear = el('button', 'text-btn', 'Clear');
-      clear.type = 'button';
-      clear.onclick = () => {
-        updateProject(p.id, { folder: '' });
-        renderProjects();
-      };
-      row.appendChild(clear);
+    if (state.settings.contextFolder) {
+      const folderField = el('div', 'project-field');
+      folderField.appendChild(el('span', 'field-title', 'Folder'));
+      folderField.appendChild(el('span', 'field-help', 'Searched before the rest of your notes.'));
+      const row = el('div', 'path-row');
+      const path = el('span', `path${p.folder ? '' : ' unset'}`, p.folder ? tildify(p.folder) : 'No folder');
+      path.title = p.folder;
+      row.appendChild(path);
+      if (p.folder) {
+        const clear = el('button', 'text-btn', 'Clear');
+        clear.type = 'button';
+        clear.onclick = () => {
+          updateProject(p.id, { folder: '' });
+          renderProjects();
+        };
+        row.appendChild(clear);
+      }
+      const pick = el('button', 'btn', 'Choose folder');
+      pick.type = 'button';
+      pick.onclick = () => chooseProjectFolder(p.id);
+      row.appendChild(pick);
+      folderField.appendChild(row);
+      body.appendChild(folderField);
     }
-    const pick = el('button', 'btn', 'Choose folder');
-    pick.type = 'button';
-    pick.onclick = () => chooseProjectFolder(p.id);
-    row.appendChild(pick);
-    folderField.appendChild(row);
-    body.appendChild(folderField);
 
     const filesField = el('div', 'project-field');
     const filesHead = el('div', 'field-head');
@@ -506,25 +390,6 @@
     }
     body.appendChild(filesField);
 
-    const styleField = el('label', 'project-field');
-    styleField.appendChild(el('span', 'field-title', 'Style of notes'));
-    const style = el('select');
-    for (const [value, label] of [
-      ['', 'Same as Answers'],
-      ['general', 'General'],
-      ['sales', 'Sales call'],
-      ['interview', 'Interview'],
-      ['oneone', 'One to one'],
-    ]) {
-      const o = el('option', null, label);
-      o.value = value;
-      style.appendChild(o);
-    }
-    style.value = p.template || '';
-    style.addEventListener('change', () => updateProject(p.id, { template: style.value }));
-    styleField.appendChild(style);
-    body.appendChild(styleField);
-
     const del = el('button', 'text-btn project-delete', 'Delete project');
     del.type = 'button';
     del.onclick = () => deleteProject(p);
@@ -554,10 +419,6 @@
 
   async function chooseProjectFolder(id) {
     const notes = state.settings.contextFolder.replace(/\/+$/, '');
-    if (!notes) {
-      toast('Choose a notes folder first.', { action: { label: 'Open Knowledge', run: () => showSection('knowledge') } });
-      return;
-    }
     const dir = await api.pickFolder('Project folder, inside your notes folder', notes);
     if (!dir) return;
     if (!dir.startsWith(`${notes}/`)) {
@@ -579,13 +440,13 @@
     const value = r.values.projectBrief;
     const current = projects().find((x) => x.id === id);
     if (!value || value === current.brief) {
-      toast('Nothing new on this project in your knowledge.');
+      toast('Nothing new on this project yet.');
       return;
     }
     const before = current.brief;
     updateProject(id, { brief: value });
     renderProjects();
-    toast(`Drafted the brief. Check it reads right.${usedNotes(r.files)}`, {
+    toast(`Drafted the brief. Check it reads right.${usedSources(r)}`, {
       timeout: 12000,
       action: {
         label: 'Undo',
@@ -599,21 +460,21 @@
 
   // Added straight away, with Undo. A list to tick looked saved when it wasn't,
   // and it was gone once the window closed.
-  async function suggestProjects(button) {
-    const r = await draft(['projects'], button);
+  async function suggestProjects(button, pasted) {
+    const r = await draft(['projects'], button, null, pasted);
     if (!r) return;
     const known = new Set(projects().map((p) => p.name.trim().toLowerCase()));
     const added = r.values.projects
       .filter((p) => !known.has(p.name.toLowerCase()))
       .map(({ name, brief, folder }) => newProject({ name, brief, folder }));
     if (!added.length) {
-      toast('No new projects in your notes.');
+      toast('No new projects found. After a call with a new client, it offers to save one.', { timeout: 9000 });
       return;
     }
     const ids = new Set(added.map((p) => p.id));
     saveProjects([...projects(), ...added]);
     renderProjects();
-    toast(`Added ${added.length} project${added.length === 1 ? '' : 's'}. Check they read right.${usedNotes(r.files)}`, {
+    toast(`Added ${added.length} project${added.length === 1 ? '' : 's'}. Check they read right.${usedSources(r)}`, {
       timeout: 12000,
       action: {
         label: 'Undo',
@@ -670,7 +531,7 @@
     const total = list.join(', ').length;
     const count = `${list.length} term${list.length === 1 ? '' : 's'}`;
     $('termBudget').textContent = !list.length
-      ? 'Press the spark to pull names from your knowledge, or type one and press Enter.'
+      ? 'Press the spark to find them for you, or type one and press Enter.'
       : total > TERM_LIMIT
         ? `${count}. Speech recognition only reads the first ${TERM_LIMIT} characters, so the dimmed ones are left out.`
         : `${count}, ${total} of ${TERM_LIMIT} characters.`;
@@ -697,38 +558,6 @@
     });
   }
 
-  function renderModels() {
-    const box = $('modelList');
-    box.replaceChildren();
-    for (const m of state.models) {
-      const item = el('label', 'seg-item tall');
-      const radio = el('input');
-      radio.type = 'radio';
-      radio.name = 'whisperModel';
-      radio.checked = state.settings.whisperModel === m.id;
-      radio.onchange = () => save({ whisperModel: m.id });
-      item.appendChild(radio);
-      item.appendChild(el('span', 'seg-title', m.label));
-      item.appendChild(el('span', 'seg-sub', m.size));
-      item.appendChild(el('span', 'seg-note', m.note));
-      const d = state.download;
-      if (m.downloaded) item.appendChild(el('span', 'seg-state ok', 'Ready'));
-      else if (d && d.id === m.id) {
-        const pct = d.total ? Math.floor((d.received / d.total) * 100) : 0;
-        item.appendChild(el('span', 'seg-state', `${pct}%`));
-      } else if (!state.testMode) {
-        const b = el('button', 'btn small', 'Download');
-        b.type = 'button';
-        b.onclick = (e) => {
-          e.preventDefault();
-          startDownload(m.id);
-        };
-        item.appendChild(b);
-      }
-      box.appendChild(item);
-    }
-  }
-
   function renderFolderIssue() {
     const text = FOLDER_ISSUES[state.status && state.status.notes];
     $('folderIssue').textContent = text || '';
@@ -746,30 +575,6 @@
     const speech = { server: 'whisper-server', cli: 'whisper-cli, slower' }[st.whisper.mode] || st.whisper.mode;
     $('aboutStatus').replaceChildren(el('span', null, version));
     if (speech) $('aboutStatus').appendChild(el('span', null, speech));
-  }
-
-  async function startDownload(id) {
-    const r = await api.downloadModel(id);
-    if (!r.ok) toast(r.error || 'Download failed.', { level: 'error' });
-  }
-
-  async function refreshMicList() {
-    try {
-      const devices = await navigator.mediaDevices.enumerateDevices();
-      const sel = $('micSelect');
-      const current = state.settings.micDeviceId;
-      sel.replaceChildren();
-      const def = el('option', null, 'System default');
-      def.value = 'default';
-      sel.appendChild(def);
-      let i = 1;
-      for (const d of devices.filter((x) => x.kind === 'audioinput' && x.deviceId !== 'default')) {
-        const o = el('option', null, d.label || `Microphone ${i++}`);
-        o.value = d.deviceId;
-        sel.appendChild(o);
-      }
-      sel.value = [...sel.options].some((o) => o.value === current) ? current : 'default';
-    } catch {}
   }
 
   // ---------- saving ----------
@@ -800,10 +605,6 @@
         input.addEventListener('change', () => save({ [key]: input.value }));
       }
     }
-    for (const radio of document.querySelectorAll('.seg input[type="radio"]')) {
-      radio.addEventListener('change', () => save({ [radio.name]: radio.value }));
-    }
-    for (const b of document.querySelectorAll('.nav-item')) b.onclick = () => showSection(b.dataset.section);
     $('addFiles').onclick = async () => {
       const files = await api.pickFiles();
       if (files.length) save({ contextFiles: [...new Set([...state.settings.contextFiles, ...files])] });
@@ -817,6 +618,7 @@
     $('connectorDesktop').onclick = () => connectorAction($('connectorDesktop'), api.addToClaudeDesktop);
     $('installUpdate').onclick = () => api.installUpdate();
     $('reportIssue').onclick = () => api.openReport();
+    $('reportDetails').addEventListener('toggle', () => $('reportDetails').open && refreshReport());
     $('showLog').onclick = () => api.revealLog();
     $('copyReport').onclick = () => {
       api.copy($('reportText').value);
@@ -830,13 +632,22 @@
       $('projectList').querySelector('.project.open input').focus();
     };
     $('suggestProjects').onclick = () => suggestProjects($('suggestProjects'));
-    for (const b of document.querySelectorAll('[data-draft]')) b.onclick = () => draftProfile([b.dataset.draft], b);
     $('draftAll').onclick = () => draftProfile(PROFILE_FIELDS, $('draftAll'));
     $('draftTerms').onclick = () => draftTerms($('draftTerms'));
-    $('draftKnowledge').onclick = () => draftKnowledge($('draftKnowledge'));
     $('draftStop').onclick = () => api.cancelDraft();
-    $('tileProfile').onclick = () => showSection('you');
-    $('openNotes').onclick = () => api.open('notes');
+    $('pasteMemory').onclick = () => {
+      $('pasteForm').hidden = !$('pasteForm').hidden;
+      if (!$('pasteForm').hidden) $('pasteText').focus();
+    };
+    $('pasteForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const text = $('pasteText').value.trim();
+      if (!text) return;
+      await suggestProjects($('suggestProjects'), text);
+      $('pasteText').value = '';
+      $('pasteForm').hidden = true;
+    });
+    $('clearNotes').onclick = () => save({ contextFolder: '', folderAccess: false });
     $('pickContextFolder').onclick = async () => {
       const dir = await api.pickFolder('Notes folder to search during calls');
       if (dir) save({ contextFolder: dir, folderAccess: true });
@@ -847,52 +658,42 @@
     };
     $('openSaveFolder').onclick = () => api.open('folder');
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') window.close();
+      if (e.key === 'Escape') api.showView('now');
     });
-    // Typing is saved on a delay, and closing the window must not lose it.
+    // Typing is saved on a delay, and leaving the page must not lose it.
     window.addEventListener('beforeunload', flush);
+    document.addEventListener('visibilitychange', flush);
 
-    api.on('calls:changed', () => onPage('connect') && refreshConnector());
     api.on('settings', (s) => {
       state.settings = s;
       render();
-      if (onPage('knowledge')) refreshKnowledge();
     });
     api.on('status', (st) => {
-      const notesChanged = state.status && state.status.notes !== st.notes;
       state.status = st;
-      state.download = st.download;
       renderAbout();
       renderFolderIssue();
-      if (notesChanged && onPage('knowledge')) refreshKnowledge();
     });
     api.on('draft:progress', ({ file }) => {
       $('draftText').textContent = `Reading ${file}`;
     });
-    api.on('models', (list) => {
-      state.models = list;
-      renderModels();
+    api.on('settings:section', ({ section, find }) => {
+      showSection(section);
+      if (find) suggestProjects($('suggestProjects'));
     });
-    api.on('model:progress', (p) => {
-      state.download = p.done ? null : p;
-      renderModels();
-    });
-    api.on('settings:section', showSection);
   }
 
   async function init() {
     const s = await api.getState();
     state.settings = s.settings;
     state.status = s.status;
-    state.models = s.models;
-    state.testMode = s.testMode;
-    state.download = s.status.download;
     document.body.classList.add(`platform-${s.platform}`);
     render();
     renderAbout();
     renderFolderIssue();
     bind();
-    showSection(new URLSearchParams(location.search).get('section') || 'you');
+    const query = new URLSearchParams(location.search);
+    showSection(query.get('section') || 'you');
+    if (query.get('find')) suggestProjects($('suggestProjects'));
   }
 
   init();

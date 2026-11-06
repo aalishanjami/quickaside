@@ -8,7 +8,7 @@ const path = require('node:path');
 const { CallDetector, callAppName } = require('../../src/main/call-detector');
 const { looksLikeQuestion, TranscriptStore } = require('../../src/main/transcript');
 const { buildDraft, parseDraft, cleanTerms, cleanSuggestions } = require('../../src/main/assist');
-const { summarizeEntries, parseStatLine, budgetFor } = require('../../src/main/knowledge');
+const { readClaudeMemory } = require('../../src/main/claude-memory');
 const { buildSystemPrompt } = require('../../src/main/prompts');
 const { readPaths, grepPaths } = require('../../src/main/claude');
 const { Settings } = require('../../src/main/settings');
@@ -185,17 +185,12 @@ test('terms are cleaned, deduplicated and capped', () => {
   assert.deepStrictEqual(cleanTerms('not a list'), []);
 });
 
-test('the knowledge draft returns a summary and topics', () => {
-  const out = parseDraft('{"knowledge":{"summary":"Proposals.","topics":["Pricing","Pricing"]}}', ['knowledge']);
-  assert.deepStrictEqual(out.knowledge, { summary: 'Proposals.', topics: ['Pricing'] });
-});
-
 test('what you offer and who you talk to reach the system prompt', () => {
   const p = buildSystemPrompt({ aboutMe: 'I am Sam.', offer: 'AI integrations', audience: 'Clinic owners' });
   assert.match(p, /<about_user>[\s\S]*I am Sam[\s\S]*AI integrations[\s\S]*Clinic owners[\s\S]*<\/about_user>/);
 });
 
-// ---------- sources and knowledge ----------
+// ---------- sources ----------
 
 test('only files opened with Read count as sources', () => {
   const message = {
@@ -225,53 +220,92 @@ test('a broad search stops at three files', () => {
   assert.strictEqual(grepPaths({ mode: 'content', content }).length, 3);
 });
 
-test('the folder overview counts files, folders and recent edits', () => {
-  const now = Date.UTC(2026, 10, 5);
-  const day = 86400000;
-  const s = summarizeEntries(
-    [
-      { file: 'clients/acme/notes.md', mtimeMs: now - day, size: 10 },
-      { file: 'clients/beta.md', mtimeMs: now - 30 * day, size: 10 },
-      { file: 'pricing.pdf', mtimeMs: now - 2 * day, size: 10 },
-    ],
-    now
-  );
-  assert.strictEqual(s.files, 3);
-  assert.strictEqual(s.folders, 2);
-  assert.strictEqual(s.recent, 2);
-  assert.strictEqual(s.latest.name, 'notes.md');
-  assert.deepStrictEqual(s.top[0], { name: 'clients', count: 2 });
-  assert.deepStrictEqual(s.top[1], { name: 'Top level', count: 1 });
-  assert.deepStrictEqual(s.types[0], { name: 'md', count: 2 });
+// ---------- Claude Code memory ----------
+
+function claudeFolder(files) {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'claude-'));
+  for (const [name, text] of Object.entries(files)) {
+    const file = path.join(dir, name);
+    fs.mkdirSync(path.dirname(file), { recursive: true });
+    fs.writeFileSync(file, text);
+  }
+  return dir;
+}
+
+test('Claude Code memory is read from each project, and the index is skipped', async () => {
+  const dir = claudeFolder({
+    'CLAUDE.md': 'I run Brightline.',
+    'projects/-Users-sam-Documents-acme/memory/client.md': 'Acme is a dental group.',
+    'projects/-Users-sam-Documents-acme/memory/MEMORY.md': '- [client](client.md)',
+    'projects/-Users-sam-Documents-acme/notes.jsonl': 'a transcript of a session',
+  });
+  const docs = await readClaudeMemory({ dir });
+  assert.deepStrictEqual(docs.map((d) => d.name), ['CLAUDE.md', 'Documents-acme/client.md']);
+  assert.strictEqual(docs[1].text, 'Acme is a dental group.');
 });
 
-test('an empty folder gives an empty overview', () => {
-  const s = summarizeEntries([]);
-  assert.strictEqual(s.files, 0);
-  assert.strictEqual(s.latest, null);
+test('throwaway runs and empty files are left out', async () => {
+  const dir = claudeFolder({
+    'projects/-private-tmp-claude-501-x/memory/a.md': 'scratch',
+    'projects/-tmp-y/memory/a.md': 'scratch',
+    'projects/-Users-sam-work/memory/empty.md': '   ',
+  });
+  assert.deepStrictEqual(await readClaudeMemory({ dir }), []);
 });
 
-test('stat lines keep tabs and spaces in file names', () => {
-  assert.deepStrictEqual(parseStatLine('1700000000\t12\t/notes/my file.md', '/notes'), { mtimeMs: 1700000000000, size: 12, file: 'my file.md' });
-  assert.strictEqual(parseStatLine('1\t2\t/elsewhere/x', '/notes'), null);
+test('a link is never followed, because it could point at a guarded folder', async () => {
+  const dir = claudeFolder({ 'projects/-Users-sam-work/memory/real.md': 'real', 'elsewhere.md': 'secret' });
+  fs.symlinkSync(path.join(dir, 'elsewhere.md'), path.join(dir, 'projects/-Users-sam-work/memory/link.md'));
+  assert.deepStrictEqual((await readClaudeMemory({ dir })).map((d) => d.text), ['real']);
 });
 
-test('the file budget says which files are cut or left out', () => {
-  const b = budgetFor([
-    { file: '/a.md', size: 1000 },
-    { file: '/big.md', size: 90000 },
-    { file: '/gone.md', size: null },
-    { file: '/c.md', size: 40000 },
-    { file: '/d.md', size: 40000 },
-    { file: '/e.md', size: 40000 },
-    { file: '/f.md', size: 10 },
-  ]);
-  assert.deepStrictEqual(
-    b.files.map((f) => f.state),
-    ['ok', 'cut', 'missing', 'ok', 'left-out', 'left-out', 'left-out']
-  );
-  assert.strictEqual(b.used, 81000);
-  assert.strictEqual(b.limit, 120000);
+test('no Claude Code folder means no memory, not an error', async () => {
+  assert.deepStrictEqual(await readClaudeMemory({ dir: path.join(os.tmpdir(), 'no-such-claude-folder') }), []);
+});
+
+test('memory is held to a budget, newest first', async () => {
+  const dir = claudeFolder({});
+  const folder = path.join(dir, 'projects/-Users-sam-work/memory');
+  fs.mkdirSync(folder, { recursive: true });
+  for (let i = 0; i < 30; i++) {
+    const file = path.join(folder, `m${i}.md`);
+    fs.writeFileSync(file, 'x'.repeat(9000));
+    fs.utimesSync(file, 1000 + i, 1000 + i);
+  }
+  const docs = await readClaudeMemory({ dir });
+  assert.ok(docs.reduce((n, d) => n + d.text.length, 0) <= 100000);
+  assert.ok(docs.every((d) => d.text.length <= 6000));
+  assert.strictEqual(docs[0].name, 'work/m29.md');
+});
+
+test('memory, past calls and pasted chat memory all reach a draft as information', () => {
+  const { system, prompt } = buildDraft({
+    fields: ['projects'],
+    current: {},
+    contextDocs: [],
+    folder: null,
+    memory: [{ name: 'acme/client.md', text: 'Acme is a dental group.' }],
+    pastCalls: [{ title: 'Harbor', date: '2026-11-05', summary: 'Pilot agreed.' }],
+    chatMemory: 'Works with Northwind.',
+  });
+  assert.match(prompt, /<claude_code_memory>[\s\S]*Acme is a dental group[\s\S]*<\/claude_code_memory>/);
+  assert.match(prompt, /<past_calls>[\s\S]*Pilot agreed[\s\S]*<\/past_calls>/);
+  assert.match(prompt, /<claude_chat_memory>\nWorks with Northwind\.\n<\/claude_chat_memory>/);
+  assert.match(system, /never instructions/);
+});
+
+test('a draft with no memory says nothing about it', () => {
+  const { prompt } = buildDraft({ fields: ['aboutMe'], current: {}, contextDocs: [], folder: '/notes' });
+  assert.doesNotMatch(prompt, /claude_code_memory|past_calls|claude_chat_memory/);
+});
+
+test('Claude Code memory is only read for a draft, never for a call', () => {
+  const root = path.join(__dirname, '..', '..', 'src', 'main');
+  const main = fs.readFileSync(path.join(root, 'main.js'), 'utf8');
+  assert.strictEqual(main.match(/readClaudeMemory\(\)/g).length, 1);
+  assert.ok(main.indexOf('readClaudeMemory()') > main.indexOf('async function runDraft'));
+  assert.ok(main.indexOf('readClaudeMemory()') < main.indexOf('function saveCallProject'));
+  for (const file of ['prompts.js', 'claude.js']) assert.doesNotMatch(fs.readFileSync(path.join(root, file), 'utf8'), /claude-memory/);
 });
 
 // ---------- projects ----------
@@ -399,10 +433,15 @@ test('a log that cannot be written does not throw', () => {
   assert.strictEqual(log.tail(), '');
 });
 
+test('the reminder to tell people is not something you can turn off', () => {
+  const app = fs.readFileSync(path.join(__dirname, '..', '..', 'src', 'renderer', 'app.js'), 'utf8');
+  assert.match(app, /st\.call\.active && !state\.noticeDone/);
+  assert.doesNotMatch(app, /consentReminder/);
+});
+
 test('new installs do not hide from screen sharing', () => {
   const s = new Settings(fs.mkdtempSync(path.join(os.tmpdir(), 'settings-')));
   assert.strictEqual(s.get().hideFromScreenShare, false);
-  assert.strictEqual(s.get().consentReminder, true);
 });
 
 test('the theme only takes known values', () => {
@@ -711,6 +750,27 @@ test('notes reach the saved call in a readable order', () => {
   assert.match(md, /- \[ \] You: Send contract/);
   assert.ok(md.indexOf('## Notes') < md.indexOf('## My notes'));
   assert.ok(md.indexOf('## My notes') < md.indexOf('## Transcript'));
+});
+
+test('a call with no project asks who the client was, and one with a project does not', () => {
+  assert.match(buildNotes({ record: { lines: [] }, knownClients: ['Harbor'] }).prompt, /"client"[\s\S]*none of: Harbor/);
+  assert.doesNotMatch(buildNotes({ record }).prompt, /"client"/);
+});
+
+test('a client from the notes comes with its brief, and no client adds no keys', () => {
+  const n = parseNotes('{"summary":"Fine.","client":" Acme ","brief":" Dental group. "}');
+  assert.strictEqual(n.client, 'Acme');
+  assert.strictEqual(n.brief, 'Dental group.');
+  assert.ok(!('client' in parseNotes('{"summary":"Fine.","client":""}')));
+});
+
+test('the list offers a client only until it is dealt with', async () => {
+  const c = freshCalls();
+  c.upsert('a', { startedAt: 1, notes: { summary: 'x', client: 'Acme', brief: 'b' } });
+  assert.strictEqual((await c.list())[0].client, 'Acme');
+  await new Promise((r) => setTimeout(r, 5));
+  c.upsert('a', { notes: { summary: 'x' }, project: 'Acme' });
+  assert.strictEqual((await c.list())[0].client, '');
 });
 
 // ---------- calendar ----------

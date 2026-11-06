@@ -1,7 +1,7 @@
 {
   "name": "quickaside",
   "productName": "Quickaside",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A side panel that transcribes your call on your Mac and answers questions with your own Claude Code login. No API keys.",
   "main": "src/main/index.js",
   "private": true,

@@ -62,6 +62,7 @@
       li.appendChild(b);
       list.appendChild(li);
     }
+    list.hidden = !state.calls.length;
     $('listEmpty').hidden = state.calls.length > 0;
     $('listEmpty').textContent = state.query ? 'No calls match that.' : 'Your calls will show up here.';
   }
@@ -313,7 +314,11 @@
         renderCall();
       }
     });
+    api.on('library:select', select);
+    const wanted = new URLSearchParams(location.search).get('call');
+    if (wanted) state.current = wanted;
     await refreshList();
+    if (wanted) await select(wanted);
     if (!state.calls.length) renderCall();
   }
 

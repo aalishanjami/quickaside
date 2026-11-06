@@ -54,12 +54,14 @@
 <li>Your questions and your notepad</li>
 <li>Your profile, and the project brief and files in use</li>
 <li>Any notes it reads from your notes folder to answer</li>
+<li>When you press <strong>Find my projects</strong> or <strong>Fill in for me</strong>: what Claude Code has saved on this Mac (its memory files and your <code>~/.claude/CLAUDE.md</code>), summaries of your past calls, and any Claude chat memory you paste in</li>
 </ul>
 <p>With <strong>Answer every question they ask</strong> on, which is the default, this happens during the call without you pressing anything.</p>
 <p>Anthropic's terms and your account's privacy settings decide how long this is kept and how it's used, and those depend on your plan. Check them before you use this on confidential calls. See <a href="https://www.anthropic.com/legal/privacy">Anthropic's privacy policy</a>.</p>
 <p><strong>To check for updates.</strong> The app sends its version and platform to <code>update.electronjs.org</code>, a free service run by the Electron project. Updates download from GitHub. Both can see your IP address.</p>
 <p><strong>To download the speech model.</strong> It comes from Hugging Face, which can see your IP address.</p>
 <p><strong>When you choose to.</strong> <strong>Report a problem</strong> opens a public GitHub issue in your browser. It shows you what would be shared first, and you send it yourself. Don't post anything private there.</p>
+<p><strong>Claude Code's memory, when you ask.</strong> Claude Code keeps notes on your work, which can cover every client you use it for. The app reads them only when you press one of those two buttons, and never during a call, so one client's details can't reach another's call. What it finds is saved as your profile or a project, which you can edit or delete. Pasted chat memory is used once and isn't kept. The app can't reach your Claude chat memory by itself.</p>
 <p><strong>The connector, if you turn it on.</strong> Your own Claude Code or Claude Desktop can then read your saved calls. What it reads goes to Anthropic through your account, as with anything else you share with Claude. It's off until you turn it on.</p>
 <p><strong>The calendar, if you turn it on.</strong> The app reads the event you're in, to name the call and match the project. It's off by default. The title and attendee names are saved with the call, so they reach Claude when you ask across your calls.</p>
 <h2>The people on your calls</h2>
@@ -72,12 +74,12 @@
 </ul>
 <h2>Your choices</h2>
 <ul>
-<li><strong>Save each call</strong>: turn it off under Privacy and nothing is kept, with no transcript, no file and no notes.</li>
+<li><strong>Save each call</strong>: turn it off and nothing is kept, with no transcript, no file and no notes, and nothing goes to Claude when the call ends.</li>
 <li><strong>Answer every question they ask</strong>: turn it off, and Claude doesn't see the call until you ask something or the notes are written.</li>
-<li><strong>Write notes after each call</strong>: turn it off, and nothing goes to Claude when the call ends.</li>
 <li><strong>Pause</strong>: stops transcribing for as long as you need.</li>
 <li><strong>Past calls</strong>: delete any call. Check your save folder too, because the markdown copy is yours to keep or delete.</li>
-<li><strong>Notes folder</strong>: Claude reads only this folder and the files you added, and you can skip it.</li>
+<li><strong>Your notes</strong>: during a call, Claude reads only this folder and the files you added, and you can skip it.</li>
+<li><strong>Find my projects and Fill in for me</strong>: these are the only things that read Claude Code's memory. Don't press them and it stays unread.</li>
 </ul>
 <p>Deleting a call here doesn't delete what Anthropic already received. Your Claude account settings cover that.</p>
 <h2>Removing everything</h2>

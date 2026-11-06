@@ -3,9 +3,8 @@
 (() => {
   const api = window.quickaside;
   const $ = (id) => document.getElementById(id);
-  const { tildify } = window.ui;
 
-  const STEPS = ['welcome', 'claude', 'speech', 'access', 'knowledge'];
+  const STEPS = ['welcome', 'claude', 'access'];
   const INSTALL = 'curl -fsSL https://claude.ai/install.sh | bash';
 
   const state = { step: 0, settings: null, status: null, models: [], download: null, claudeReady: false, micOk: false, audioOk: false };
@@ -22,8 +21,6 @@
         return $('consent').checked;
       case 'claude':
         return state.claudeReady;
-      case 'speech':
-        return modelReady();
       default:
         return true;
     }
@@ -34,7 +31,6 @@
     for (const s of document.querySelectorAll('[data-step]')) s.hidden = s.dataset.step !== name;
     [...$('steps').children].forEach((li, i) => li.classList.toggle('done', i <= state.step));
     $('back').hidden = state.step === 0;
-    $('skip').hidden = name !== 'access' && name !== 'knowledge';
     const last = state.step === STEPS.length - 1;
     $('next').textContent = last ? 'Finish' : 'Continue';
     $('next').disabled = !canContinue();
@@ -44,13 +40,13 @@
     state.step = step;
     renderNav();
     if (STEPS[step] === 'claude') checkClaude();
-    if (STEPS[step] === 'speech') renderModel();
     if (STEPS[step] === 'access') renderAccess();
   }
 
   function next() {
-    if (state.step === STEPS.length - 1) api.setupFinish();
-    else go(state.step + 1);
+    if (state.step === STEPS.length - 1) return api.setupFinish();
+    if (state.step === 0) download(); // it takes minutes, so it runs behind the other steps
+    go(state.step + 1);
   }
 
   // ---------- Claude Code ----------
@@ -90,36 +86,27 @@
     return state.models.find((m) => m.id === state.settings.whisperModel);
   }
 
-  function modelReady() {
-    const m = model();
-    return !!(m && m.downloaded);
-  }
-
   function renderModel() {
     const m = model();
     if (!m) return;
     const d = state.download;
-    const busy = d && d.id === m.id;
-    lamp('modelLamp', m.downloaded ? 'ok' : busy ? 'starting' : 'pending');
-    $('modelDownload').hidden = m.downloaded || busy;
-    $('modelProgress').hidden = !busy;
-    if (m.downloaded) $('modelStatus').textContent = `${m.label} model is ready`;
-    else if (busy) {
+    if (m.downloaded) $('modelLine').textContent = state.started ? 'Speech model ready' : '';
+    else if (d && d.id === m.id) {
       const pct = d.total ? Math.floor((d.received / d.total) * 100) : 0;
-      $('modelStatus').textContent = `Downloading, ${pct}%`;
-      $('modelFill').style.transform = `scaleX(${pct / 100})`;
-    } else $('modelStatus').textContent = `${m.label} model, ${m.size}`;
-    renderNav();
+      $('modelLine').textContent = `Speech model ${pct}%`;
+    }
   }
 
   async function download() {
-    $('modelDownload').hidden = true;
-    const r = await api.downloadModel(state.settings.whisperModel);
-    if (!r.ok) {
-      $('modelStatus').textContent = r.error || 'The download failed. Try again.';
-      $('modelDownload').textContent = 'Try again';
-      $('modelDownload').hidden = false;
-    }
+    const m = model();
+    if (!m || m.downloaded || state.download) return;
+    state.started = true;
+    $('modelRetry').hidden = true;
+    $('modelLine').textContent = 'Speech model starting';
+    const r = await api.downloadModel(m.id);
+    if (r.ok) return;
+    $('modelLine').textContent = 'The speech model did not download.';
+    $('modelRetry').hidden = false;
   }
 
   // ---------- permissions ----------
@@ -177,7 +164,6 @@
   function bind() {
     $('consent').addEventListener('change', renderNav);
     $('next').onclick = next;
-    $('skip').onclick = next;
     $('back').onclick = () => go(state.step - 1);
     $('claudeRetry').onclick = checkClaude;
     $('copyCommand').onclick = () => {
@@ -185,22 +171,15 @@
       $('copyCommand').textContent = 'Copied';
       setTimeout(() => ($('copyCommand').textContent = 'Copy'), 1200);
     };
-    $('modelDownload').onclick = download;
+    $('modelRetry').onclick = download;
     $('micAllow').onclick = allowMic;
     $('micSettings').onclick = () => api.setupPrivacy('microphone');
     $('audioTest').onclick = testAudio;
     $('audioSettings').onclick = () => api.setupPrivacy('call-audio');
-    $('pickFolder').onclick = async () => {
-      const dir = await api.pickFolder('Notes folder to search during calls');
-      if (!dir) return;
-      api.updateSettings({ contextFolder: dir, folderAccess: true });
-      $('folderPath').textContent = tildify(dir);
-      $('folderPath').classList.remove('unset');
-    };
     api.on('status', (st) => {
       state.status = st;
       state.download = st.download;
-      if (STEPS[state.step] === 'speech') renderModel();
+      renderModel();
       if (STEPS[state.step] === 'access') renderAccess();
     });
     api.on('models', (list) => {

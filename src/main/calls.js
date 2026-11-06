@@ -50,6 +50,7 @@ function metaOf(record) {
     app: record.app || '',
     project: record.project || '',
     summary: record.notes ? record.notes.summary : '',
+    client: (record.notes && record.notes.client) || '',
     lines: lines.length,
     file: record.file || '',
   };

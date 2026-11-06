@@ -2,7 +2,78 @@
 
 body {
   flex-direction: column;
-  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+/* ---------- the one window: sidebar on the left, the call beside it ---------- */
+
+.shell {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+
+.now {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Past calls and Settings are pages laid over this spot. */
+body.away .now {
+  visibility: hidden;
+}
+
+.rail {
+  display: none;
+  flex: none;
+  flex-direction: column;
+  gap: 2px;
+  width: var(--rail-width);
+  padding: 6px 10px 14px;
+  background: var(--raise);
+}
+
+body.rail-open .rail {
+  display: flex;
+}
+
+.rail-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 34px;
+  padding: 0 9px;
+  border: 0;
+  border-radius: var(--radius);
+  background: none;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.rail-item svg {
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+}
+
+.rail-item:hover {
+  background: var(--raise-2);
+  color: var(--text);
+}
+
+.rail-item[aria-current='page'] {
+  background: var(--signal);
+  color: var(--on-signal);
+}
+
+/* Setup has nothing to go to yet. */
+body.in-setup #railBtn {
+  display: none;
 }
 
 /* ---------- head: what is happening, and nothing to press by accident ---------- */
@@ -12,7 +83,7 @@ body {
   align-items: center;
   gap: 8px;
   height: 44px;
-  padding: 0 6px 0 16px;
+  padding: 0 6px 0 84px; /* the red, yellow and green buttons sit in this space */
   flex: none;
   -webkit-app-region: drag;
 }
@@ -139,15 +210,18 @@ body.live .meters {
   color: var(--text);
 }
 
-/* Minimized to the title bar. A dot means an answer came in meanwhile. */
-body.minimized .context,
-body.minimized .banners,
-body.minimized .stage {
+/* Shrunk to the title bar. A dot means an answer came in meanwhile. */
+body.minimized .shell {
   display: none;
 }
 
 #minBtn {
+  display: none;
   position: relative;
+}
+
+body.shape-panel:not(.idle) #minBtn {
+  display: grid;
 }
 
 #minBtn .min-box,
@@ -404,6 +478,95 @@ body.answer-waiting #minBtn::after {
   margin: 22px 0 0;
   padding: 0;
   border-top: 1px solid var(--line);
+}
+
+.checks[hidden] {
+  display: none;
+}
+
+.home-card {
+  margin-top: 26px;
+}
+
+.home-card h2 {
+  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.home-card p {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.last-call {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.last-call:hover {
+  background: var(--raise);
+}
+
+.last-title {
+  font-size: 14.5px;
+  font-weight: 600;
+}
+
+.last-meta {
+  color: var(--faint);
+  font-size: 12.5px;
+}
+
+.last-summary {
+  display: -webkit-box;
+  overflow: hidden;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 13.5px;
+  line-height: 1.4;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.offer {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.offer-text {
+  flex: 1 1 100%;
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.home-card .offer-text {
+  color: var(--text);
+}
+
+/* With room to spare, the words keep a readable width. */
+body:not(.shape-panel) .home,
+body:not(.shape-panel) .cue-zone,
+body:not(.shape-panel) .context {
+  width: 100%;
+  max-width: 640px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .check {

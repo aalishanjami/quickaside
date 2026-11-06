@@ -32,6 +32,7 @@ If the app falls back to `whisper-cli`, each short piece of audio sits in a temp
 - Your questions and your notepad
 - Your profile, and the project brief and files in use
 - Any notes it reads from your notes folder to answer
+- When you press **Find my projects** or **Fill in for me**: what Claude Code has saved on this Mac (its memory files and your `~/.claude/CLAUDE.md`), summaries of your past calls, and any Claude chat memory you paste in
 
 With **Answer every question they ask** on, which is the default, this happens during the call without you pressing anything.
 
@@ -42,6 +43,8 @@ Anthropic's terms and your account's privacy settings decide how long this is ke
 **To download the speech model.** It comes from Hugging Face, which can see your IP address.
 
 **When you choose to.** **Report a problem** opens a public GitHub issue in your browser. It shows you what would be shared first, and you send it yourself. Don't post anything private there.
+
+**Claude Code's memory, when you ask.** Claude Code keeps notes on your work, which can cover every client you use it for. The app reads them only when you press one of those two buttons, and never during a call, so one client's details can't reach another's call. What it finds is saved as your profile or a project, which you can edit or delete. Pasted chat memory is used once and isn't kept. The app can't reach your Claude chat memory by itself.
 
 **The connector, if you turn it on.** Your own Claude Code or Claude Desktop can then read your saved calls. What it reads goes to Anthropic through your account, as with anything else you share with Claude. It's off until you turn it on.
 
@@ -58,12 +61,12 @@ Their words are transcribed, saved on your Mac and sent to Anthropic through you
 
 ## Your choices
 
-- **Save each call**: turn it off under Privacy and nothing is kept, with no transcript, no file and no notes.
+- **Save each call**: turn it off and nothing is kept, with no transcript, no file and no notes, and nothing goes to Claude when the call ends.
 - **Answer every question they ask**: turn it off, and Claude doesn't see the call until you ask something or the notes are written.
-- **Write notes after each call**: turn it off, and nothing goes to Claude when the call ends.
 - **Pause**: stops transcribing for as long as you need.
 - **Past calls**: delete any call. Check your save folder too, because the markdown copy is yours to keep or delete.
-- **Notes folder**: Claude reads only this folder and the files you added, and you can skip it.
+- **Your notes**: during a call, Claude reads only this folder and the files you added, and you can skip it.
+- **Find my projects and Fill in for me**: these are the only things that read Claude Code's memory. Don't press them and it stays unread.
 
 Deleting a call here doesn't delete what Anthropic already received. Your Claude account settings cover that.
 

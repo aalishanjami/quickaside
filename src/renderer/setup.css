@@ -4,19 +4,12 @@ body {
   flex-direction: column;
 }
 
-.drag-strip {
-  position: fixed;
-  inset: 0 0 auto;
-  height: 38px;
-  -webkit-app-region: drag;
-}
-
 .steps {
   display: flex;
   gap: 6px;
   flex: none;
   margin: 0;
-  padding: 52px 40px 0;
+  padding: 8px 40px 0;
   list-style: none;
 }
 
@@ -212,6 +205,11 @@ h1 {
 
 .spacer {
   flex: 1;
+}
+
+.model-line {
+  color: var(--faint);
+  font-size: 12.5px;
 }
 
 .next {

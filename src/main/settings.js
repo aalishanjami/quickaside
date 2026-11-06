@@ -17,8 +17,6 @@ function defaults() {
     contextFiles: [], // files whose text is given to Claude at the start of each session
     folderAccess: false, // let Claude read files in contextFolder with Read/Glob/Grep
     contextFolder: '',
-    knowledgeSummary: '', // written by the spark button on the Knowledge page
-    knowledgeTopics: [],
     projects: [], // { id, name, brief, folder, files }, see cleanProject
     activeProject: '', // id of the project calls are about, '' for none
     // Transcription
@@ -41,7 +39,6 @@ function defaults() {
     panelBounds: null,
     setupDone: false, // the first-run window has been finished
     hideFromScreenShare: false,
-    consentReminder: true, // remind the user to tell people, when each call starts
     theme: 'system', // system | light | dark
     saveTranscripts: true,
     saveFolder: path.join(os.homedir(), 'Documents', 'Quickaside'),

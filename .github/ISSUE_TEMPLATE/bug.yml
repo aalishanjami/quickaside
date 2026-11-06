@@ -28,7 +28,7 @@ body:
     id: report
     attributes:
       label: Report a problem output
-      description: In Quickaside, open Settings > Help, press Copy all and paste it here. It holds versions, status and the recent log, and never transcripts. Check it before you send it.
+      description: In Quickaside, open Settings, scroll to Help, press See what a report shares, then Copy all, and paste it here. It holds versions, status and the recent log, and never transcripts. Check it before you send it.
       render: text
     validations:
       required: true

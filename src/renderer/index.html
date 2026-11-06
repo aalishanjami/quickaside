@@ -12,6 +12,12 @@
   </head>
   <body class="idle">
     <header class="head">
+      <button id="railBtn" class="icon-btn" type="button" title="Show or hide the sidebar" aria-label="Show or hide the sidebar">
+        <svg viewBox="0 0 20 20" width="17" height="17" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="2.75" y="4" width="14.5" height="12" rx="2" />
+          <path d="M7.5 4v12" />
+        </svg>
+      </button>
       <span class="tally" aria-hidden="true"></span>
       <span class="timer" id="timer"></span>
       <span class="head-title" id="headTitle">Quickaside</span>
@@ -25,36 +31,39 @@
           <span class="meter-track"><span class="meter-fill" id="meterThem"></span></span>
         </div>
       </div>
-      <button id="libraryBtn" class="icon-btn" type="button" title="Past calls" aria-label="Past calls">
-        <svg viewBox="0 0 20 20" width="17" height="17" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square">
-          <path d="M4 5h12M4 10h12M4 15h8" />
-        </svg>
-      </button>
-      <button id="settingsBtn" class="icon-btn" type="button" title="Settings" aria-label="Settings">
-        <svg viewBox="0 0 20 20" width="17" height="17" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square">
-          <path d="M3 6h7M14 6h3M3 14h3M10 14h7" />
-          <rect x="10" y="3.8" width="4" height="4.4" />
-          <rect x="6" y="11.8" width="4" height="4.4" />
-        </svg>
-      </button>
-      <button id="minBtn" class="icon-btn" type="button" title="Minimize to a small bar" aria-label="Minimize panel">
+      <button id="minBtn" class="icon-btn" type="button" title="Shrink to a small bar" aria-label="Shrink to a small bar">
         <svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
           <path class="min-line" d="M5 10h10" />
           <rect class="min-box" x="5" y="5" width="10" height="10" />
         </svg>
       </button>
-      <button id="hideBtn" class="icon-btn" type="button" title="Hide. It keeps running in the menu bar." aria-label="Hide panel">
-        <svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
-          <path d="M5 5l10 10M15 5L5 15" />
-        </svg>
-      </button>
     </header>
 
+    <div class="shell">
+      <nav class="rail" id="rail" aria-label="Quickaside">
+        <button class="rail-item" type="button" data-view="now">
+          <svg viewBox="0 0 20 20" width="17" height="17" aria-hidden="true"><path d="M4 4.5h3l1.2 3.4-1.7 1.3a9 9 0 0 0 4.3 4.3l1.3-1.7 3.4 1.2v3c0 .5-.4.9-.9.9C8.7 16.9 3.1 11.3 3.1 5.400c0-.5.4-.9.9-.9z" /></svg>
+          <span>Now</span>
+        </button>
+        <button class="rail-item" type="button" data-view="calls">
+          <svg viewBox="0 0 20 20" width="17" height="17" aria-hidden="true"><path d="M3.5 10a6.5 6.5 0 1 0 2-4.700L3.5 7.3" /><path d="M3.5 3.800v3.500h3.500M10 6.500V10l2.5 1.5" /></svg>
+          <span>Past calls</span>
+        </button>
+        <button class="rail-item" type="button" data-view="projects">
+          <svg viewBox="0 0 20 20" width="17" height="17" aria-hidden="true"><path d="M3 5h5l1.6 2H17v9.500H3z" /></svg>
+          <span>Projects</span>
+        </button>
+        <button class="rail-item" type="button" data-view="settings">
+          <svg viewBox="0 0 20 20" width="17" height="17" aria-hidden="true"><path d="M3 6h7M14 6h3M3 14h3M10 14h7" /><rect x="10" y="3.8" width="4" height="4.4" /><rect x="6" y="11.8" width="4" height="4.4" /></svg>
+          <span>Settings</span>
+        </button>
+      </nav>
+
+      <div class="now" id="now">
     <div class="context" id="context" hidden>
       <span class="project-pick" id="projectWrap" hidden>
         <select id="projectSelect" aria-label="Project for this call"></select>
       </span>
-      <button class="text-btn" id="addProject" type="button" hidden>Add a project</button>
       <button class="note-btn" id="noteBtn" type="button"></button>
       <form class="note-form" id="noteForm" autocomplete="off" hidden>
         <input id="noteInput" type="text" maxlength="300" placeholder="For this call, like: worried about price" aria-label="Note for this call" />
@@ -69,12 +78,23 @@
         <p class="home-sub" id="homeSub"></p>
         <button class="start" id="startNow" type="button">Start now</button>
         <ul class="checks" id="checks"></ul>
+        <section class="home-card" id="findCard" hidden>
+          <h2>Find your clients</h2>
+          <p>Reads what Claude Code remembers and your notes, once, and sets up a project for each client. Projects are optional.</p>
+          <button class="btn" id="findProjects" type="button">Find my projects</button>
+        </section>
+        <section class="home-card" id="lastCall" hidden>
+          <h2>Last call</h2>
+          <button class="last-call" id="lastCallOpen" type="button"></button>
+          <div class="offer" id="lastOffer" hidden></div>
+        </section>
       </section>
 
       <section class="cue-zone" id="cueZone" aria-label="Answers">
         <section class="call-notes" id="callNotes" aria-label="Notes from this call" hidden>
           <p class="call-stats" id="callStats" hidden></p>
           <div id="notesBody"></div>
+          <div class="offer" id="notesOffer" hidden></div>
         </section>
         <div class="listening" id="answersEmpty" hidden>
           <p class="listening-title">Listening.</p>
@@ -124,6 +144,8 @@
         <button class="jump" id="jumpLive" type="button" hidden>Jump to live</button>
       </section>
     </main>
+      </div>
+    </div>
 
     <div class="toasts" id="toasts" aria-live="polite"></div>
 

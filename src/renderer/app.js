@@ -3,7 +3,7 @@
 (() => {
   const api = window.quickaside;
   const $ = (id) => document.getElementById(id);
-  const { el, basename, tildify, modelName, toast, usableProjects, fillProjects } = window.ui;
+  const { el, basename, tildify, modelName, toast, usableProjects, hasProject, fillProjects } = window.ui;
 
   const QUICK = [
     ['answer', 'Answer them', 'Words to answer the last question they asked'],
@@ -21,6 +21,8 @@
     blocked: 'Folder blocked by macOS',
     missing: 'Notes folder not found',
   };
+
+  const VIEW_TITLES = { calls: 'Past calls', projects: 'Projects', settings: 'Settings', setup: 'Set up Quickaside' };
 
   // A line to paste into the meeting chat. Telling people is the user's job, so make it one click.
   const HEADS_UP = "Heads up: I'm using an AI note taker on this call. Tell me if you'd rather I didn't.";
@@ -41,6 +43,8 @@
     noticeDone: false, // the consent reminder has been dealt with for this call
     notepadOpen: false,
     callNotes: null, // { state, notes, error } for the call that just ended
+    layout: { view: 'now', railOpen: false, shape: 'panel', railWidth: 176 },
+    lastCall: null, // the newest saved call, for the home screen
   };
 
   // ---------- helpers ----------
@@ -246,7 +250,8 @@
     $('cueZone').hidden = idle;
     $('answersEmpty').hidden = !empty || idle;
     document.body.classList.toggle('paused', !!call.paused);
-    $('headTitle').textContent = call.paused ? 'Paused' : call.active ? call.title || call.app || 'Listening' : ended ? 'Ended' : 'Quickaside';
+    const away = VIEW_TITLES[state.layout.view];
+    $('headTitle').textContent = away || (call.paused ? 'Paused' : call.active ? call.title || call.app || 'Listening' : ended ? 'Ended' : 'Quickaside');
     $('listeningSub').textContent = s.autoAnswer ? 'Answers land here as soon as they ask a question.' : 'Press Answer them when you need the words.';
     $('answersEmpty').querySelector('.listening-title').textContent = call.active ? 'Listening.' : 'No answers from this call.';
     $('askInput').placeholder = idle ? 'Ask something before the call' : 'Ask about this call';
@@ -270,6 +275,7 @@
     const n = state.callNotes;
     const show = !st.call.active && !st.call.stopping && (!!n || !!(stats && stats.turns));
     $('callNotes').hidden = !show;
+    $('notesOffer').hidden = true;
     if (!show) return;
     $('callStats').hidden = !(stats && stats.turns);
     if (stats && stats.turns) {
@@ -302,9 +308,37 @@
           })
         );
       }
-      row.appendChild(noteButton('Open in Past calls', () => api.openLibrary()));
+      row.appendChild(noteButton('Open in Past calls', () => api.openLibrary(st.call.id)));
       body.appendChild(row);
     }
+    renderOffer($('notesOffer'), st.call.id, !st.call.project && n.notes ? n.notes.client : '', () => {
+      n.notes = { ...n.notes, client: '' };
+      renderCallNotes();
+    });
+  }
+
+  // A client named on a call, offered as a project. Nobody needs notes for this.
+  function renderOffer(box, id, client, cleared) {
+    const show = !!client && !hasProject(state.settings.projects, client);
+    box.hidden = !show;
+    box.replaceChildren();
+    if (!show) return;
+    box.appendChild(el('p', 'offer-text', `Save ${client} as a project?`));
+    const save = el('button', 'btn small', 'Save project');
+    save.type = 'button';
+    save.onclick = async () => {
+      const r = await api.saveCallProject(id);
+      if (!r.ok) return toast(r.error, { level: 'error' });
+      toast(`Saved ${r.name}. Pick it when a call starts.`, { timeout: 4000 });
+      cleared();
+    };
+    box.appendChild(save);
+    box.appendChild(
+      noteButton('Not now', () => {
+        api.skipCallProject(id);
+        cleared();
+      })
+    );
   }
 
   function noteList(box, title, items) {
@@ -329,7 +363,6 @@
     const has = usableProjects(s.projects).length > 0;
     $('context').hidden = false;
     $('projectWrap').hidden = !has;
-    $('addProject').hidden = has;
     const select = $('projectSelect');
     fillProjects(select, s.projects, s.activeProject, [{ value: 'manage', label: 'Edit projects' }]);
     $('projectWrap').classList.toggle('on', !!select.value);
@@ -350,7 +383,6 @@
       }
       select.blur();
     });
-    $('addProject').onclick = () => api.openSettings('projects');
     const form = $('noteForm');
     const input = $('noteInput');
     const close = () => {
@@ -403,42 +435,62 @@
       $('homeSub').textContent = 'Start when you want answers.';
     } else if (blocked) {
       $('homeTitle').textContent = 'Not ready yet.';
-      $('homeSub').textContent = 'Sort out the items marked yellow.';
+      $('homeSub').textContent = 'Sort out the items below.';
     } else {
       $('homeTitle').textContent = 'Waiting for a call.';
-      $('homeSub').textContent = detecting ? 'A small prompt appears when one starts. You can close this.' : 'Press Start now when it begins.';
+      $('homeSub').textContent = detecting ? 'It offers to start when your call app does.' : 'Press Start now when it begins.';
     }
+    $('findCard').hidden = usableProjects(s.projects).length > 0;
+    renderLastCall();
   }
 
+  function renderLastCall() {
+    const c = state.lastCall;
+    $('lastCall').hidden = !c;
+    if (!c) return;
+    const box = $('lastCallOpen');
+    const when = new Date(c.startedAt).toLocaleString(undefined, { weekday: 'short', hour: 'numeric', minute: '2-digit' });
+    const mins = c.endedAt ? `${Math.max(1, Math.round((c.endedAt - c.startedAt) / 60000))} min` : '';
+    box.replaceChildren(el('span', 'last-title', c.title), el('span', 'last-meta', [when, mins].filter(Boolean).join(', ')));
+    if (c.summary) box.appendChild(el('span', 'last-summary', c.summary));
+    box.onclick = () => api.openLibrary(c.id);
+    renderOffer($('lastOffer'), c.id, c.client, () => {
+      c.client = '';
+      renderLastCall();
+    });
+  }
+
+  async function refreshLastCall() {
+    const list = await api.listCalls();
+    state.lastCall = list[0] || null;
+    if (document.body.classList.contains('idle')) renderLastCall();
+  }
+
+  // Only what needs doing. When all is well there is nothing to read here.
   function renderChecks() {
     const st = state.status;
     const s = state.settings;
     const model = state.models.find((m) => m.id === s.whisperModel);
     const speechReady = state.testMode || (model && model.downloaded);
-    const folder = s.folderAccess && s.contextFolder ? basename(s.contextFolder) : '';
-    const files = s.contextFiles.length ? `${s.contextFiles.length} file${s.contextFiles.length === 1 ? '' : 's'}` : '';
-    const knowledge = [folder, files].filter(Boolean).join(' + ');
     const micBlocked = s.captureMic && st.micAccess === 'denied';
     const claudeMissing = st.claude.state === 'missing';
     const notesIssue = NOTES_ISSUES[st.notes];
-    const rows = [
-      ['Microphone', 'listening', !s.captureMic ? ['off', 'Off'] : micBlocked ? ['warn', 'Blocked in System Settings'] : ['ok', 'On']],
-      // macOS has no way to ask about this permission up front. Silence during the call is the only sign.
-      ['Call audio', 'listening', s.captureSystem ? ['pending', 'Confirmed once audio plays'] : ['off', 'Off']],
-      ['Speech', 'listening', speechReady ? ['ok', model ? `${model.label} model` : 'Ready'] : ['warn', 'Needs a download']],
-      ['Answers', 'answers', claudeMissing ? ['warn', 'Claude Code not found'] : ['ok', modelName(s.claudeModel)]],
-      ['Knowledge', 'knowledge', notesIssue ? ['warn', notesIssue] : knowledge ? ['ok', knowledge] : ['off', 'None attached']],
-      ['Call detection', 'listening', !s.detectCalls ? ['off', 'Off'] : st.detect.state === 'missing' ? ['warn', 'Not installed'] : ['ok', 'On']],
-    ];
+    const rows = [];
+    if (micBlocked) rows.push(['Microphone', 'Blocked in System Settings', () => api.setupPrivacy('microphone')]);
+    if (!speechReady) rows.push(['Speech', state.download ? 'Downloading' : 'Needs a download', null]);
+    if (claudeMissing) rows.push(['Answers', 'Claude Code not found', null]);
+    if (notesIssue) rows.push(['Notes', notesIssue, () => api.openSettings('you')]);
+    if (s.detectCalls && st.detect.state === 'missing') rows.push(['Call detection', 'Not installed', () => api.openSettings('calls')]);
     const list = $('checks');
     list.replaceChildren();
-    for (const [label, section, [level, value]] of rows) {
+    list.hidden = !rows.length;
+    for (const [label, value, run] of rows) {
       const li = el('li');
-      const b = el('button', `check ${level}`);
+      const b = el('button', 'check warn');
       b.type = 'button';
-      b.title = 'Open in Settings';
-      b.onclick = () => api.openSettings(section);
-      b.appendChild(el('span', `lamp ${level}`));
+      b.disabled = !run;
+      if (run) b.onclick = run;
+      b.appendChild(el('span', 'lamp warn'));
       b.appendChild(el('span', 'check-label', label));
       b.appendChild(el('span', 'check-value', value));
       li.appendChild(b);
@@ -513,7 +565,7 @@
     }
     if (st.mic.state === 'error' && st.mic.error) add('warn', `Microphone: ${st.mic.error}`);
     if (st.call.active && st.call.paused) add('info', 'Paused. Nothing is being transcribed.');
-    if (st.call.active && s.consentReminder && !state.noticeDone) {
+    if (st.call.active && !state.noticeDone) {
       const done = () => {
         state.noticeDone = true;
         renderBanners();
@@ -531,10 +583,10 @@
       ]);
     }
     if (st.call.active && NOTES_ISSUES[st.notes]) {
-      add('warn', 'Answers are not using your notes folder right now.', [['Settings', () => api.openSettings('knowledge')]]);
+      add('warn', 'Answers are not using your notes folder right now.', [['Settings', () => api.openSettings('you')]]);
     }
     if ((st.whisper.backlog || 0) > 6) {
-      add('warn', 'Transcription is falling behind. A faster speech model will help.', [['Settings', () => api.openSettings('listening')]]);
+      add('warn', 'Transcription is falling behind, so answers may come late.');
     }
   }
 
@@ -638,6 +690,25 @@
     };
   }
 
+  // ---------- the one window ----------
+
+  // The window is this page. Past calls and Settings are pages laid over it, so
+  // this only has to draw the sidebar and step out of the way.
+  function applyLayout(layout) {
+    state.layout = layout;
+    const body = document.body;
+    body.style.setProperty('--rail-width', `${layout.railWidth}px`);
+    body.classList.toggle('rail-open', layout.railOpen && layout.shape === 'wide');
+    body.classList.toggle('in-setup', layout.view === 'setup');
+    body.classList.toggle('shape-panel', layout.shape === 'panel');
+    body.classList.toggle('away', layout.view !== 'now');
+    for (const b of document.querySelectorAll('.rail-item')) {
+      if (b.dataset.view === layout.view) b.setAttribute('aria-current', 'page');
+      else b.removeAttribute('aria-current');
+    }
+    renderStage();
+  }
+
   // ---------- wiring ----------
 
   function bind() {
@@ -652,9 +723,10 @@
     $('endBtn').onclick = () => (state.status.call.active ? api.stopCall() : start());
     $('openSaved').onclick = () => api.open('transcript');
     $('pauseBtn').onclick = () => api.pauseCall(!state.status.call.paused);
-    $('hideBtn').onclick = () => api.hidePanel();
+    $('railBtn').onclick = () => api.toggleRail();
     $('minBtn').onclick = () => api.minimizePanel(!document.body.classList.contains('minimized'));
-    $('libraryBtn').onclick = () => api.openLibrary();
+    for (const b of document.querySelectorAll('.rail-item')) b.onclick = () => api.showView(b.dataset.view);
+    $('findProjects').onclick = () => api.findProjects();
     let notepadTimer = null;
     $('notepad').addEventListener('input', () => {
       clearTimeout(notepadTimer);
@@ -681,15 +753,10 @@
       api.copy(transcriptText());
       toast('Transcript copied.', { timeout: 2000 });
     };
-    $('settingsBtn').onclick = () => api.openSettings();
-    document.addEventListener('keydown', (e) => {
-      if (e.metaKey && e.key === ',') {
-        e.preventDefault();
-        api.openSettings();
-      }
-    });
 
     api.on('status', applyStatus);
+    api.on('layout', applyLayout);
+    api.on('calls:changed', refreshLastCall);
     api.on('level', onLevel);
     api.on('transcript:add', ({ line, beforeId }) => addLine(line, beforeId));
     api.on('transcript:remove', removeLine);
@@ -700,8 +767,8 @@
     api.on('panel:minimized', (on) => {
       document.body.classList.toggle('minimized', on);
       document.body.classList.remove('answer-waiting');
-      $('minBtn').title = on ? 'Back to full size' : 'Minimize to a small bar';
-      $('minBtn').setAttribute('aria-label', on ? 'Restore panel' : 'Minimize panel');
+      $('minBtn').title = on ? 'Back to full size' : 'Shrink to a small bar';
+      $('minBtn').setAttribute('aria-label', on ? 'Back to full size' : 'Shrink to a small bar');
     });
     api.on('reset', () => {
       state.noticeDone = false;
@@ -750,7 +817,9 @@
     for (const l of s.lines) addLine(l, null);
     for (const q of s.qa) upsertQa(q);
     applyStatus(s.status);
+    applyLayout(s.layout);
     bind();
+    refreshLastCall();
   }
 
   init();

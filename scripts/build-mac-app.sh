@@ -57,7 +57,6 @@ plutil -replace CFBundleIdentifier -string "$BUNDLE_ID" "$PLIST"
 plutil -replace NSMicrophoneUsageDescription -string "Quickaside transcribes your side of the call on this Mac." "$PLIST"
 plutil -replace NSAudioCaptureUsageDescription -string "Quickaside transcribes the other side of the call on this Mac." "$PLIST"
 plutil -replace NSCalendarsFullAccessUsageDescription -string "Quickaside reads the event you are in, to name the call and suggest the project." "$PLIST"
-plutil -replace LSUIElement -bool true "$PLIST" # lives in the menu bar, no Dock icon
 cp build/icon.icns "$RES/$NAME.icns" # drawn by scripts/make-icon.js
 rm -f "$RES/electron.icns"
 plutil -replace CFBundleIconFile -string "$NAME.icns" "$PLIST"

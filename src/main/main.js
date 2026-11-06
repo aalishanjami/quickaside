@@ -4,6 +4,7 @@ const {
   app,
   autoUpdater,
   BrowserWindow,
+  WebContentsView,
   crashReporter,
   Tray,
   Menu,
@@ -35,10 +36,10 @@ const { TranscriptStore, toMarkdown, looksLikeQuestion } = require('./transcript
 const { ClaudeSession } = require('./claude');
 const { MODELS, modelPath, isDownloaded, downloadModel, getModel } = require('./models');
 const { buildSystemPrompt, buildTurn, readContextFiles, QUICK_ACTIONS, buildAutoRequest } = require('./prompts');
-const { settingsBounds, centeredBounds, panelBounds, promptBounds, MIN_WIDTH, MIN_HEIGHT, PANEL_MIN_WIDTH, PANEL_MIN_HEIGHT, PANEL_BAR_HEIGHT } = require('./window-layout');
+const { panelBounds, wideBounds, panelFromWide, setupBounds, promptBounds, PANEL_MIN_WIDTH, PANEL_MIN_HEIGHT, HEAD_HEIGHT, RAIL_WIDTH, WIDE_MIN_WIDTH, WIDE_MIN_HEIGHT } = require('./window-layout');
 const { CallDetector } = require('./call-detector');
 const { DRAFT_FIELDS, buildDraft, parseDraft } = require('./assist');
-const { scanFolder, describeContextFiles } = require('./knowledge');
+const { readClaudeMemory } = require('./claude-memory');
 const { Log } = require('./log');
 const { Updater, repoFromIssues } = require('./updater');
 const { CallStore, talkStats, callTitle, parseMarkdownCall, statsLine } = require('./calls');
@@ -66,10 +67,14 @@ const testMode = {
 };
 
 let win = null;
-let settingsWin = null;
 let promptWin = null;
-let setupWin = null;
-let libraryWin = null;
+const pages = {}; // library, settings and setup, shown inside the window as they are needed
+let view = 'now'; // now | calls | projects | settings | setup
+let railOpen = true; // the sidebar, closed when a call starts
+let shape = 'panel'; // panel | wide | setup
+let panelRest = null; // the panel's bounds while the window is another shape
+let wideSize = null; // how big the user left the wide window
+let floating = null; // unknown at first, because the panel type starts out floating
 let tray = null;
 let quitting = false;
 let installing = false; // quitting to install an update, so windows must really close
@@ -349,7 +354,7 @@ async function preflight() {
   if (process.env.QUICKASIDE_WHISPER_URL) return null;
   const m = getModel(s.whisperModel);
   if (!isDownloaded(modelsDir, s.whisperModel)) {
-    return `Download the ${m ? m.label.toLowerCase() : ''} speech model first (Settings, Transcription).`;
+    return download ? 'The speech model is still downloading. Start again when it finishes.' : `Download the ${m ? m.label.toLowerCase() : ''} speech model first.`;
   }
   const { server, cli } = await resolveWhisper();
   if (!server && !cli) return 'Whisper is not installed. Run ./setup.sh in the quickaside folder, then restart the app.';
@@ -411,6 +416,9 @@ async function startCall() {
   emitStatus();
   log.info('call.start', { app: call.app, project: !!call.project, mic: wantMic, system: s.captureSystem, autoAnswer: s.autoAnswer });
   send('call:started', { captureMic: wantMic, micDeviceId: s.micDeviceId });
+  view = 'now';
+  railOpen = false; // on a call the window is the panel
+  applyLayout();
   return { ok: true };
 }
 
@@ -577,7 +585,7 @@ async function writeNotes(id, template) {
   send('notes:update', { id, state: 'working' });
   const startedAt = Date.now();
   const job = claude.once({
-    ...buildNotes({ record, template: chosen, aboutMe: s.aboutMe, instructions: s.instructions, brief: project ? project.brief : '' }),
+    ...buildNotes({ record, template: chosen, aboutMe: s.aboutMe, instructions: s.instructions, brief: project ? project.brief : '', knownClients: s.projects.map((p) => p.name) }),
     folder: null,
   });
   notesJobs.set(id, job);
@@ -791,13 +799,16 @@ detector.on('ended', () => {
 
 async function startListening({ focus }) {
   hideCallPrompt();
+  view = 'now';
+  railOpen = false;
+  applyLayout();
   showPanel({ focus });
   const r = await startCall();
   if (!r.ok) send('toast', { level: 'error', message: r.error });
   return r;
 }
 
-// ---------- drafts and knowledge ----------
+// ---------- drafts ----------
 
 function notesFolderInUse() {
   const s = settings.get();
@@ -811,7 +822,18 @@ function suggestedFolder(notes, relative) {
   return isInside(notes, full) && fs.existsSync(full) ? full : '';
 }
 
-async function runDraft(fields, projectId) {
+// What the saved calls were about, for finding projects with no notes to go on.
+async function recentCalls() {
+  const list = await calls.list();
+  return list
+    .filter((c) => c.summary)
+    .slice(0, 20)
+    .map((c) => ({ title: c.title, date: new Date(c.startedAt).toISOString().slice(0, 10), summary: c.summary }));
+}
+
+// Claude Code's memory is read here and nowhere else: only when the user presses
+// a button for it, and never on a call, where one client's facts could reach another.
+async function runDraft(fields, projectId, pasted) {
   const wanted = (Array.isArray(fields) ? fields : []).filter((f) => f in DRAFT_FIELDS);
   if (!wanted.length) return { ok: false, error: 'Nothing to draft.' };
   if (draftJob) return { ok: false, error: 'Already drafting.' };
@@ -819,25 +841,31 @@ async function runDraft(fields, projectId) {
   const folder = notesFolderInUse();
   const project = s.projects.find((p) => p.id === projectId) || null;
   const contextDocs = readContextFiles([...(project ? project.files : []), ...s.contextFiles].map(expandHome));
-  if (!folder && !contextDocs.length) {
-    return { ok: false, code: 'no-sources', error: 'Connect a notes folder or add a context file first.' };
+  const memory = await readClaudeMemory().catch((err) => {
+    log.warn('draft.memory', { error: err });
+    return [];
+  });
+  const pastCalls = wanted.includes('projects') ? await recentCalls() : [];
+  const chatMemory = String(pasted || '').slice(0, 40000);
+  if (!folder && !contextDocs.length && !memory.length && !pastCalls.length && !chatMemory.trim()) {
+    return { ok: false, code: 'no-sources', error: 'There is nothing to read yet. Add your notes, or have a call first.' };
   }
   const job = claude.once({
-    ...buildDraft({ fields: wanted, current: s, contextDocs, folder, project: project && { ...project, folder: projectFolder(project) } }),
+    ...buildDraft({ fields: wanted, current: s, contextDocs, folder, project: project && { ...project, folder: projectFolder(project) }, memory, pastCalls, chatMemory }),
     folder,
     onFile: (file) => {
-      if (settingsWin && !settingsWin.isDestroyed()) settingsWin.webContents.send('draft:progress', { file: path.basename(file) });
+      if (pages.settings) pages.settings.webContents.send('draft:progress', { file: path.basename(file) });
     },
   });
   draftJob = job;
   const startedAt = Date.now();
-  log.info('draft.start', { fields: wanted.join(','), notes: !!folder });
+  log.info('draft.start', { fields: wanted.join(','), notes: !!folder, memory: memory.length, calls: pastCalls.length, pasted: !!chatMemory.trim() });
   try {
     const { text, files } = await job.done;
     log.info('draft.done', { ms: Date.now() - startedAt, files: files.length });
     const values = parseDraft(text, wanted);
     if (values.projects) values.projects = values.projects.map((p) => ({ ...p, folder: suggestedFolder(folder, p.folder) }));
-    return { ok: true, values, files: files.map((f) => path.basename(f)) };
+    return { ok: true, values, files: files.map((f) => path.basename(f)), memory: memory.length, calls: pastCalls.length };
   } catch (err) {
     log[err.message === 'Cancelled.' ? 'info' : 'warn']('draft.end', { error: err.message });
     return { ok: false, cancelled: err.message === 'Cancelled.', error: err.message };
@@ -846,11 +874,29 @@ async function runDraft(fields, projectId) {
   }
 }
 
-async function knowledgeOverview() {
+// A call often names a client nobody has set up yet, and this turns that into a
+// project with one click. Nothing is assumed about the user having notes.
+function saveCallProject(id) {
+  const record = calls.get(id);
+  const client = record && record.notes && record.notes.client;
+  if (!client) return { ok: false, error: 'That call has no client to save.' };
   const s = settings.get();
-  const folder = notesFolderInUse();
-  const [context, scan] = await Promise.all([describeContextFiles(s.contextFiles.map(expandHome)), folder ? scanFolder(folder) : null]);
-  return { context, scan };
+  const project = { id: `p${Date.now().toString(36)}`, name: client, brief: record.notes.brief || '', folder: '', files: [] };
+  const { settings: next } = settings.update({ projects: [...s.projects, project] });
+  claude.configChanged();
+  send('settings', next);
+  clearProjectOffer(id, client);
+  log.info('project.from-call');
+  return { ok: true, name: client };
+}
+
+function clearProjectOffer(id, project) {
+  const record = calls.get(id);
+  if (!record || !record.notes) return;
+  const { client, brief, ...notes } = record.notes;
+  writeMarkdown(calls.upsert(id, { notes, ...(project ? { project } : {}) }));
+  if (project && call.id === id) call.project = project;
+  send('calls:changed');
 }
 
 // ---------- updates ----------
@@ -934,14 +980,14 @@ function reportUrl() {
 
 // ---------- state to renderer ----------
 
-// The settings window only needs these; the panel gets everything.
+// The pages only need these; the panel gets everything.
 const SHARED_CHANNELS = new Set(['status', 'models', 'model:progress', 'settings', 'notes:update', 'calls:changed']);
 const PRIVACY_PANES = { microphone: 'Privacy_Microphone', 'call-audio': 'Privacy_ScreenCapture' };
 
 function send(channel, payload) {
   if (win && !win.isDestroyed()) win.webContents.send(channel, payload);
   if (SHARED_CHANNELS.has(channel)) {
-    for (const w of [settingsWin, setupWin, libraryWin]) if (w && !w.isDestroyed()) w.webContents.send(channel, payload);
+    for (const v of Object.values(pages)) if (!v.webContents.isDestroyed()) v.webContents.send(channel, payload);
   }
   if (channel === 'settings' && promptWin && !promptWin.isDestroyed()) promptWin.webContents.send(channel, payload);
 }
@@ -987,6 +1033,7 @@ function publicState() {
     lines: store.lines,
     qa,
     models: modelsList(),
+    layout: layoutState(),
     platform: process.platform,
     testMode: !!(testMode.them || testMode.you),
   };
@@ -1000,13 +1047,18 @@ function windowBackground() {
 
 function applyTheme() {
   nativeTheme.themeSource = settings.get().theme; // theme.css follows prefers-color-scheme, which this sets
-  for (const w of [win, settingsWin, promptWin, libraryWin]) if (w && !w.isDestroyed()) w.setBackgroundColor(windowBackground());
+  for (const w of [win, promptWin]) if (w && !w.isDestroyed()) w.setBackgroundColor(windowBackground());
+  for (const v of Object.values(pages)) v.setBackgroundColor(windowBackground());
+}
+
+function secureContents(contents) {
+  contents.setWindowOpenHandler(() => ({ action: 'deny' }));
+  contents.on('will-navigate', (e) => e.preventDefault());
 }
 
 function secureWindow(w) {
   w.setContentProtection(!!settings.get().hideFromScreenShare);
-  w.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
-  w.webContents.on('will-navigate', (e) => e.preventDefault());
+  secureContents(w.webContents);
 }
 
 function preferences(extra) {
@@ -1025,8 +1077,18 @@ function floatOverEverything(w, level) {
   if (process.platform === 'darwin') w.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true, skipTransformProcessType: true });
 }
 
-// The app lives in the menu bar, so these windows hide instead of closing. The
-// panel has to stay loaded either way: its page runs the microphone.
+// Only the panel floats. The wide window is a normal one, or it would sit on top
+// of everything the user went to look at.
+function setFloating(on) {
+  if (floating === on) return;
+  floating = on;
+  if (on) return floatOverEverything(win, 'floating');
+  win.setAlwaysOnTop(false);
+  if (process.platform === 'darwin') win.setVisibleOnAllWorkspaces(false, { skipTransformProcessType: true });
+}
+
+// The app lives in the menu bar, so red hides the window instead of closing it.
+// It has to stay loaded either way: its page runs the microphone.
 function hideOnClose(w) {
   w.on('close', (e) => {
     if (quitting || installing) return;
@@ -1042,14 +1104,17 @@ function createPanel({ show }) {
     minWidth: PANEL_MIN_WIDTH,
     minHeight: PANEL_MIN_HEIGHT,
     show: false,
-    frame: false,
+    // With a Dock icon, only this type can float over another app's full screen.
+    // It also means a click on the panel leaves the user in their call app.
+    type: process.platform === 'darwin' ? 'panel' : undefined,
+    titleBarStyle: 'hiddenInset',
+    trafficLightPosition: { x: 16, y: 15 },
     fullscreenable: false,
     acceptFirstMouse: true, // people click it from the call app, and the first click must count
     title: 'Quickaside',
     backgroundColor: windowBackground(),
     webPreferences: preferences({ backgroundThrottling: false }),
   });
-  floatOverEverything(win, 'floating');
   secureWindow(win);
   hideOnClose(win);
   if (show) win.once('ready-to-show', () => showPanel({ focus: true }));
@@ -1057,29 +1122,114 @@ function createPanel({ show }) {
   const remember = () => {
     clearTimeout(saveTimer);
     saveTimer = setTimeout(() => {
-      if (!win || win.isDestroyed()) return;
+      if (!win || win.isDestroyed() || win.isMaximized()) return;
       const now = win.getBounds();
+      if (shape === 'wide') wideSize = { width: now.width, height: now.height };
+      if (shape !== 'panel') return;
       settings.update({ panelBounds: panelFull ? { ...panelFull, x: now.x, y: now.y } : now });
     }, 500);
   };
   win.on('moved', remember);
   win.on('resized', remember);
+  win.on('resize', placePages);
+  // The panel type never makes the app active by itself. Between calls it should.
+  win.on('focus', () => {
+    if (shape !== 'panel') app.focus({ steal: true });
+  });
   win.on('closed', () => {
     win = null;
   });
   win.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'));
+  applyLayout();
 }
 
-// Minimized, the panel shrinks to its title bar where it is, so the timer and the
-// levels stay in view. The Dock is no use here: this app isn't in it.
-let panelFull = null; // its bounds from before minimizing
+// ---------- one window, several shapes ----------
+
+const PAGE_OF_VIEW = { calls: 'library', projects: 'settings', settings: 'settings', setup: 'setup' };
+
+function layoutState() {
+  return { view, railOpen, shape, railWidth: RAIL_WIDTH };
+}
+
+function setShape(next) {
+  if (next === shape) return;
+  if (win.isMaximized()) win.unmaximize();
+  const now = win.getBounds();
+  const area = screen.getDisplayMatching(now).workArea;
+  if (shape === 'panel') panelRest = now;
+  const from = shape;
+  shape = next;
+  if (next === 'wide') {
+    win.setMinimumSize(WIDE_MIN_WIDTH, WIDE_MIN_HEIGHT);
+    win.setBounds(wideBounds(panelRest, area, wideSize));
+  } else if (next === 'setup') {
+    win.setMinimumSize(PANEL_MIN_WIDTH, PANEL_MIN_HEIGHT);
+    win.setBounds(setupBounds(screen.getPrimaryDisplay().workArea));
+  } else {
+    win.setMinimumSize(PANEL_MIN_WIDTH, PANEL_MIN_HEIGHT);
+    win.setBounds(from === 'wide' ? panelFromWide(now, panelRest, area) : panelRest);
+    panelRest = null;
+  }
+}
+
+function placePages() {
+  if (!win || win.isDestroyed()) return;
+  const { width, height } = win.getContentBounds();
+  const left = railOpen && shape === 'wide' ? RAIL_WIDTH : 0;
+  for (const [name, page] of Object.entries(pages)) {
+    const active = name === PAGE_OF_VIEW[view];
+    if (active) page.setBounds({ x: left, y: HEAD_HEIGHT, width: width - left, height: height - HEAD_HEIGHT });
+    page.setVisible(active);
+  }
+}
+
+function applyLayout() {
+  if (!win || win.isDestroyed()) return;
+  if (panelFull && (view !== 'now' || railOpen)) minimizePanel(false);
+  setShape(view === 'setup' ? 'setup' : view !== 'now' || railOpen ? 'wide' : 'panel');
+  setFloating(shape === 'panel');
+  placePages();
+  send('layout', layoutState());
+}
+
+function showView(name) {
+  view = name;
+  applyLayout();
+  showPanel({ focus: true });
+  const page = pages[PAGE_OF_VIEW[name]];
+  if (page) page.webContents.focus();
+}
+
+function openPage(name, query) {
+  if (pages[name]) return pages[name];
+  const page = new WebContentsView({ webPreferences: preferences() });
+  page.setBackgroundColor(windowBackground());
+  page.setVisible(false);
+  secureContents(page.webContents);
+  win.contentView.addChildView(page);
+  page.webContents.loadFile(path.join(__dirname, '..', 'renderer', `${name}.html`), { query: query || {} });
+  pages[name] = page;
+  return page;
+}
+
+function closePage(name) {
+  const page = pages[name];
+  if (!page) return;
+  delete pages[name];
+  win.contentView.removeChildView(page);
+  page.webContents.close();
+}
+
+// Shrunk, the panel is its title bar where it is, so the timer and the levels stay
+// in view. Yellow can't do this: macOS always sends a window to the Dock.
+let panelFull = null; // its bounds from before shrinking
 
 function minimizePanel(on) {
   if (!win || on === !!panelFull) return;
   if (on) {
     panelFull = win.getBounds();
-    win.setMinimumSize(PANEL_MIN_WIDTH, PANEL_BAR_HEIGHT);
-    win.setBounds({ ...panelFull, height: PANEL_BAR_HEIGHT });
+    win.setMinimumSize(PANEL_MIN_WIDTH, HEAD_HEIGHT);
+    win.setBounds({ ...panelFull, height: HEAD_HEIGHT });
     win.setResizable(false);
   } else {
     const now = win.getBounds();
@@ -1095,6 +1245,7 @@ function minimizePanel(on) {
 
 function showPanel({ focus }) {
   if (!win) return;
+  if (win.isMinimized()) win.restore();
   if (focus) {
     minimizePanel(false);
     win.show();
@@ -1103,6 +1254,15 @@ function showPanel({ focus }) {
   } else {
     win.showInactive(); // the user is in the call app, so leave them there
   }
+}
+
+// A macOS permission prompt takes the focus and doesn't hand it back, which leaves
+// the wide window behind whatever was open before it.
+function bringBack() {
+  if (!win || win.isDestroyed() || !win.isVisible() || shape === 'panel') return;
+  win.moveTop();
+  win.focus();
+  app.focus({ steal: true });
 }
 
 function createPrompt() {
@@ -1131,7 +1291,8 @@ function createPrompt() {
 }
 
 function showCallPrompt(name, event) {
-  if (win && win.isVisible()) return; // the panel's own home screen offers Start
+  // Home offers Start, but only if it can be seen. The wide window can be behind other apps.
+  if (win && win.isVisible() && (shape === 'panel' || win.isFocused())) return;
   if (!promptWin) createPrompt();
   const area = screen.getDisplayNearestPoint(screen.getCursorScreenPoint()).workArea;
   promptWin.setBounds(promptBounds(area));
@@ -1151,76 +1312,17 @@ function hideCallPrompt() {
   if (promptWin && !promptWin.isDestroyed()) promptWin.hide();
 }
 
-function openLibrary() {
-  if (libraryWin && !libraryWin.isDestroyed()) {
-    libraryWin.show();
-    libraryWin.focus();
-    app.focus({ steal: true });
-    return;
-  }
-  const area = screen.getPrimaryDisplay().workArea;
-  const width = Math.min(1040, area.width - 40);
-  const height = Math.min(720, area.height - 40);
-  libraryWin = new BrowserWindow({
-    width,
-    height,
-    x: area.x + Math.round((area.width - width) / 2),
-    y: area.y + Math.round((area.height - height) / 2),
-    minWidth: 760,
-    minHeight: 480,
-    show: false,
-    title: 'Past calls',
-    titleBarStyle: 'hiddenInset',
-    trafficLightPosition: { x: 18, y: 18 },
-    backgroundColor: windowBackground(),
-    webPreferences: preferences(),
-  });
-  secureWindow(libraryWin);
-  libraryWin.once('ready-to-show', () => {
-    libraryWin.show();
-    app.focus({ steal: true });
-  });
-  libraryWin.on('closed', () => {
-    libraryWin = null;
-  });
-  libraryWin.loadFile(path.join(__dirname, '..', 'renderer', 'library.html'));
-  importOldCalls().catch((err) => log.warn('calls.import', { error: err }));
+function openLibrary(id) {
+  const open = !!pages.library;
+  openPage('library', id ? { call: id } : null);
+  if (open && id) pages.library.webContents.send('library:select', id);
+  if (!open) importOldCalls().catch((err) => log.warn('calls.import', { error: err }));
+  showView('calls');
 }
 
 function openSetup() {
-  if (setupWin && !setupWin.isDestroyed()) {
-    setupWin.show();
-    setupWin.focus();
-    app.focus({ steal: true });
-    return;
-  }
-  const area = screen.getPrimaryDisplay().workArea;
-  const width = 560;
-  const height = 640;
-  setupWin = new BrowserWindow({
-    width,
-    height,
-    x: area.x + Math.round((area.width - width) / 2),
-    y: area.y + Math.round((area.height - height) / 2),
-    resizable: false,
-    minimizable: false,
-    maximizable: false,
-    fullscreenable: false,
-    show: false,
-    title: 'Set up Quickaside',
-    titleBarStyle: 'hiddenInset',
-    backgroundColor: windowBackground(),
-    webPreferences: preferences(),
-  });
-  secureWindow(setupWin);
-  setupWin.once('ready-to-show', () => {
-    setupWin.show();
-    app.focus({ steal: true });
-  });
-  setupWin.on('closed', () => {
-    setupWin = null;
-  });
-  setupWin.loadFile(path.join(__dirname, '..', 'renderer', 'setup.html'));
+  openPage('setup');
+  showView('setup');
 }
 
 function finishSetup() {
@@ -1228,7 +1330,10 @@ function finishSetup() {
   log.info('setup.done');
   trayState = null;
   emitStatus();
-  if (setupWin && !setupWin.isDestroyed()) setupWin.close();
+  view = 'now';
+  railOpen = true;
+  applyLayout();
+  closePage('setup');
   showPanel({ focus: true });
 }
 
@@ -1267,6 +1372,31 @@ async function testCallAudio(ms = 3000) {
   return { ok, error: failed ? failed.message : null };
 }
 
+// The default menu has Reload, which would drop the page running the mic, and
+// the developer tools.
+function createMenu() {
+  Menu.setApplicationMenu(
+    Menu.buildFromTemplate([
+      {
+        label: app.name,
+        submenu: [
+          { role: 'about' },
+          { type: 'separator' },
+          { label: 'Settings', accelerator: 'CommandOrControl+,', click: () => openSettings() },
+          { type: 'separator' },
+          { role: 'hide' },
+          { role: 'hideOthers' },
+          { role: 'unhide' },
+          { type: 'separator' },
+          { role: 'quit' },
+        ],
+      },
+      { role: 'editMenu' },
+      { label: 'Window', submenu: [{ role: 'minimize' }, { role: 'zoom' }, { role: 'close' }, { type: 'separator' }, { role: 'front' }] },
+    ])
+  );
+}
+
 function createTray() {
   const icon = nativeImage.createFromPath(path.join(__dirname, '..', 'assets', 'trayTemplate.png'));
   icon.setTemplateImage(true);
@@ -1300,7 +1430,7 @@ function refreshTray() {
       ...items,
       { type: 'separator' },
       ...(updater.state === 'ready' ? [{ label: 'Restart to update', enabled: !call.active, click: installUpdate }] : []),
-      { label: 'Past calls', click: openLibrary },
+      { label: 'Past calls', click: () => openLibrary() },
       { label: 'Settings', click: () => openSettings() },
       { label: 'Report a problem', click: () => openSettings('help') },
       { type: 'separator' },
@@ -1309,39 +1439,11 @@ function refreshTray() {
   );
 }
 
-function openSettings(section) {
-  if (settingsWin && !settingsWin.isDestroyed()) {
-    if (section) settingsWin.webContents.send('settings:section', section);
-    settingsWin.show();
-    settingsWin.focus();
-    app.focus({ steal: true });
-    return;
-  }
-  const panel = win.getBounds();
-  const area = screen.getDisplayMatching(panel).workArea;
-  const { clear, ...bounds } = win.isVisible() ? settingsBounds(panel, area) : centeredBounds(area);
-  settingsWin = new BrowserWindow({
-    ...bounds,
-    minWidth: MIN_WIDTH,
-    minHeight: MIN_HEIGHT,
-    show: false,
-    title: 'Quickaside Settings',
-    titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'default',
-    trafficLightPosition: { x: 18, y: 18 },
-    backgroundColor: windowBackground(),
-    webPreferences: preferences(),
-  });
-  // With no room beside the panel it would open underneath it.
-  if (!clear) settingsWin.setAlwaysOnTop(true, 'floating');
-  secureWindow(settingsWin);
-  settingsWin.once('ready-to-show', () => {
-    settingsWin.show();
-    app.focus({ steal: true });
-  });
-  settingsWin.on('closed', () => {
-    settingsWin = null;
-  });
-  settingsWin.loadFile(path.join(__dirname, '..', 'renderer', 'settings.html'), { query: section ? { section } : {} });
+function openSettings(section, find = false) {
+  const open = !!pages.settings;
+  openPage('settings', { section: section || 'you', ...(find ? { find: '1' } : {}) });
+  if (open) pages.settings.webContents.send('settings:section', { section: section || 'you', find });
+  showView(section === 'projects' ? 'projects' : 'settings');
 }
 
 function registerShortcut() {
@@ -1386,13 +1488,13 @@ function registerIpc() {
     if (changed.some((k) => CLAUDE_KEYS.includes(k))) claude.configChanged();
     if (call.active && (changed.includes('activeProject') || changed.includes('projects'))) call.project = projectName();
     if (changed.includes('activeProject') && call.active) claude.warm(); // switched mid-call, so be ready for the next question
-    if (changed.includes('folderAccess') || changed.includes('contextFolder')) checkNotesAccess();
+    if (changed.includes('folderAccess') || changed.includes('contextFolder')) checkNotesAccess().then(bringBack); // macOS may ask about the folder
     if (changed.includes('claudePath')) {
       claude.caps = null;
       claude.check().catch(() => {});
     }
     if (changed.includes('hideFromScreenShare')) {
-      for (const w of [win, settingsWin, promptWin, libraryWin]) if (w && !w.isDestroyed()) w.setContentProtection(s.hideFromScreenShare);
+      for (const w of [win, promptWin]) if (w && !w.isDestroyed()) w.setContentProtection(s.hideFromScreenShare); // a page is covered by its window
     }
     if (changed.includes('detectCalls')) {
       if (s.detectCalls) detector.start().catch(() => {});
@@ -1402,6 +1504,7 @@ function registerIpc() {
     if (changed.includes('useCalendar') && s.useCalendar) {
       calendar.request().then((access) => {
         log.info('calendar.access', { access });
+        bringBack();
         if (access === 'granted') return;
         send('settings', settings.update({ useCalendar: false }).settings);
         send('toast', { level: 'warn', message: access === 'missing' ? 'The calendar helper is not installed.' : 'Allow Calendars in System Settings > Privacy & Security, then try again.' });
@@ -1418,6 +1521,16 @@ function registerIpc() {
   });
 
   ipcMain.handle('settings:open', (_e, section) => openSettings(section ? String(section) : null));
+  ipcMain.handle('projects:find', () => openSettings('projects', true));
+  ipcMain.handle('view:show', (_e, name) => {
+    if (name === 'calls') openLibrary();
+    else if (name === 'projects' || name === 'settings') openSettings(name === 'projects' ? 'projects' : null);
+    else showView('now');
+  });
+  ipcMain.handle('rail:toggle', () => {
+    railOpen = !railOpen;
+    applyLayout();
+  });
 
   ipcMain.handle('call:start', () => startCall());
   ipcMain.handle('call:stop', () => stopCall());
@@ -1431,7 +1544,7 @@ function registerIpc() {
     if (call.startedAt && !call.active) saveCall().catch(() => {});
   });
 
-  ipcMain.handle('library:open', () => openLibrary());
+  ipcMain.handle('library:open', (_e, id) => openLibrary(id ? String(id) : null));
   ipcMain.handle('calls:list', (_e, query) => calls.list(query));
   ipcMain.handle('calls:get', (_e, id) => {
     const record = calls.get(id);
@@ -1440,6 +1553,8 @@ function registerIpc() {
   });
   ipcMain.handle('calls:templates', () => Object.entries(NOTE_TEMPLATES).map(([id, t]) => ({ id, label: t.label })));
   ipcMain.handle('calls:notes', (_e, id, template) => writeNotes(id, template));
+  ipcMain.handle('calls:save-project', (_e, id) => saveCallProject(String(id)));
+  ipcMain.handle('calls:skip-project', (_e, id) => clearProjectOffer(String(id)));
   ipcMain.handle('calls:ask', (_e, question) => askCalls(question));
   ipcMain.handle('calls:ask-cancel', () => askJob && askJob.cancel());
   ipcMain.handle('calls:notepad', (_e, id, text) => {
@@ -1483,7 +1598,11 @@ function registerIpc() {
   ipcMain.handle('connector:desktop', () => connectorStep('desktop', addToClaudeDesktop));
 
   ipcMain.handle('setup:claude', () => testClaude());
-  ipcMain.handle('setup:audio', () => testCallAudio());
+  ipcMain.handle('setup:audio', async () => {
+    const result = await testCallAudio();
+    bringBack();
+    return result;
+  });
   ipcMain.handle('setup:finish', () => finishSetup());
   ipcMain.handle('setup:privacy', (_e, which) => {
     const pane = PRIVACY_PANES[which];
@@ -1497,7 +1616,6 @@ function registerIpc() {
   });
   ipcMain.handle('report:reveal', () => shell.showItemInFolder(log.file));
 
-  ipcMain.handle('panel:hide', () => win && win.hide());
   ipcMain.handle('panel:minimize', (_e, on) => minimizePanel(!!on));
   ipcMain.handle('prompt:start', () => startListening({ focus: false }));
   ipcMain.handle('prompt:dismiss', () => {
@@ -1514,9 +1632,8 @@ function registerIpc() {
     emitStatus();
   });
 
-  ipcMain.handle('draft:run', (_e, { fields, project }) => runDraft(fields, project));
+  ipcMain.handle('draft:run', (_e, { fields, project, pasted }) => runDraft(fields, project, pasted));
   ipcMain.handle('draft:cancel', () => draftJob && draftJob.cancel());
-  ipcMain.handle('knowledge:overview', () => knowledgeOverview());
 
   ipcMain.handle('qa:ask', (_e, { text, kind }) => ask(text, kind));
   ipcMain.handle('qa:cancel', (_e, id) => claude.cancel(id));
@@ -1535,7 +1652,8 @@ function registerIpc() {
           download.total = p.total;
           send('model:progress', p);
         },
-        controller.signal
+        controller.signal,
+        process.env.QUICKASIDE_TEST_MODEL_URL ? { baseUrl: process.env.QUICKASIDE_TEST_MODEL_URL } : undefined
       );
       download = null;
       send('models', modelsList());
@@ -1556,8 +1674,10 @@ function registerIpc() {
     if (process.platform !== 'darwin') return true;
     const st = systemPreferences.getMediaAccessStatus('microphone');
     if (st === 'granted') return true;
-    if (st === 'not-determined') return systemPreferences.askForMediaAccess('microphone');
-    return false;
+    if (st !== 'not-determined') return false;
+    const allowed = await systemPreferences.askForMediaAccess('microphone');
+    bringBack();
+    return allowed;
   });
   ipcMain.on('mic:pcm', (_e, buf) => {
     if (!call.active || call.paused || !segmenters.you) return;
@@ -1609,7 +1729,6 @@ function registerIpc() {
 
 app.whenReady().then(() => {
   log.info('app.start', { version: app.getVersion(), macos: process.getSystemVersion(), arch: process.arch, electron: process.versions.electron });
-  if (process.platform === 'darwin' && app.dock) app.dock.hide(); // the installed app sets LSUIElement, this covers npm start
   // Updates can't replace an app running from a disk image.
   if (app.isPackaged && !process.env.QUICKASIDE_USER_DATA && !app.isInApplicationsFolder()) {
     try {
@@ -1621,6 +1740,7 @@ app.whenReady().then(() => {
   applyTheme();
   setupPermissions();
   registerIpc();
+  createMenu();
   const atLogin = process.platform === 'darwin' && app.getLoginItemSettings().wasOpenedAtLogin;
   const firstRun = !settings.get().setupDone;
   createPanel({ show: !atLogin && !firstRun });

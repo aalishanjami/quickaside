@@ -18,7 +18,7 @@ Only the latest release gets fixes. This is a small project with no promised rep
 
 ## What leaves your Mac
 
-- **To Anthropic, through your own Claude Code login:** the transcript text, your questions, and the notes, profile and project details you added, whenever Claude answers, writes notes or drafts something for you. The app has no server of its own and never sees your login. Anthropic's terms for your account apply.
+- **To Anthropic, through your own Claude Code login:** the transcript text, your questions, and the notes, profile and project details you added, whenever Claude answers, writes notes or drafts something for you. If you press **Find my projects** or **Fill in for me**, that also includes what Claude Code has saved on this Mac. The app has no server of its own and never sees your login. Anthropic's terms for your account apply.
 - **To update.electronjs.org:** your app version and platform, to check for updates. The service sees your IP address.
 - **To Hugging Face:** a request for the speech model, when you download it.
 
