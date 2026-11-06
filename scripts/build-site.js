@@ -62,7 +62,7 @@ function privacyPage(markdown) {
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'self'; base-uri 'none'; form-action 'none'">
   <title>Privacy: Quickaside</title>
   <meta name="description" content="What Quickaside keeps on your Mac, what leaves it, and how to delete it all.">
-  <meta name="theme-color" content="#ffd60a">
+  <meta name="theme-color" content="#0e1113">
   <link rel="canonical" href="https://quickaside.vercel.app/privacy.html">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icon.png">

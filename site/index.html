@@ -5,15 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'self'; script-src 'self'; base-uri 'none'; form-action 'none'">
   <title>Quickaside: answers while you're still on the call</title>
-  <meta name="description" content="A side panel for your Mac. It transcribes your call as it happens, and when the other person asks something, an answer appears beside the call. Free and open source.">
-  <meta name="theme-color" content="#ffd60a">
+  <meta name="description" content="Quickaside sits beside your call on your Mac. It transcribes the call as it happens, and when the other person asks something, an answer appears right there. Free and open source.">
+  <meta name="theme-color" content="#0e1113">
   <link rel="canonical" href="https://quickaside.vercel.app/">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icon.png">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Quickaside">
   <meta property="og:title" content="Answers while you're still on the call">
-  <meta property="og:description" content="A side panel for your Mac that answers from your own notes, through your own Claude Code. Free and open source.">
+  <meta property="og:description" content="It sits beside your call and answers from your own notes, through your own Claude Code. Free and open source.">
   <meta property="og:url" content="https://quickaside.vercel.app/">
   <meta property="og:image" content="https://quickaside.vercel.app/og.png">
   <meta property="og:image:width" content="1200">
@@ -44,17 +44,22 @@
     <div class="wrap hero-body">
       <div class="hero-copy">
         <h1>Answers while you're still on the call.</h1>
-        <p class="lede">Quickaside is a side panel for your Mac. It transcribes your call as it happens, and when the other person asks something, an answer appears beside the call. Answers come from your own notes, through your own Claude Code.</p>
-        <div class="cmd">
-          <code>curl -fsSL https://raw.githubusercontent.com/<wbr>aalishanjami/quickaside/<wbr>main/scripts/install.sh | bash</code>
-          <button class="copy" type="button" hidden>Copy</button>
+        <p class="lede">Quickaside sits beside your call on your Mac. It transcribes the call as it happens, and when the other person asks something, an answer appears right there. Answers come from your own notes, through your own Claude Code.</p>
+        <div class="install-box">
+          <p class="install-title">Install</p>
+          <p class="install-text">Open Terminal, paste this line and press Return. It downloads Quickaside and installs it on your Mac, with no password.</p>
+          <div class="cmd">
+            <code>curl -fsSL https://raw.githubusercontent.com/<wbr>aalishanjami/quickaside/<wbr>main/scripts/install.sh | bash</code>
+            <button class="copy" type="button" hidden>Copy</button>
+          </div>
         </div>
         <p class="fine">Free and open source. For Macs with Apple Silicon. Needs a paid Claude plan. <a href="#install">See all the steps</a>.</p>
       </div>
 
-      <figure class="hero-panel">
-        <img src="panel.png" width="420" height="720" alt="The Quickaside panel during a test call with a made-up client. A question about results from another client gets an answer that declines to give numbers it doesn't have. Below it, a question about the pilot gets the price from the project brief.">
-        <figcaption>A real test call, with a made-up client.</figcaption>
+      <figure class="hero-demo">
+        <div id="demo"></div>
+        <noscript><img src="panel.png" width="420" height="720" alt="The Quickaside panel during a test call with a made-up client. A question about results gets an answer that says there are none yet, because the pilot starts Monday."></noscript>
+        <figcaption>Try it. This is a working demo with a made-up client, and nothing leaves this page.</figcaption>
       </figure>
     </div>
   </header>
@@ -92,11 +97,19 @@
         </div>
         <div>
           <dt>Says what it doesn't know</dt>
-          <dd>It's told to claim only what's in your notes and the call. In the picture, it won't quote results it doesn't have.</dd>
+          <dd>It's told to claim only what's in your notes and the call. In the demo, it won't quote results it doesn't have.</dd>
         </div>
         <div>
           <dt>Keeps clients apart</dt>
-          <dd>Pick a project, and answers use that client's brief first.</dd>
+          <dd>Pick a project, and answers use that client's brief first. Projects are optional.</dd>
+        </div>
+        <div>
+          <dt>Finds your clients</dt>
+          <dd>Find my projects reads what Claude Code remembers on your Mac, your notes and your past calls. You don't need a notes folder. After a call with a new client, it offers to save one.</dd>
+        </div>
+        <div>
+          <dt>Stays out of your way</dt>
+          <dd>One window. It's a narrow panel over your call, even a full-screen one, and a normal app with a sidebar between calls.</dd>
         </div>
         <div>
           <dt>Writes it up after</dt>
@@ -127,6 +140,7 @@
             <h3><span class="lamp warn"></span>Goes to Anthropic</h3>
             <p>Through your own Claude Code login: the transcript, your questions, your profile, the project brief and any notes Claude reads to answer.</p>
             <p>With <strong>Answer every question they ask</strong> on, which is the default, this happens during the call without you pressing anything.</p>
+            <p>When you press <strong>Find my projects</strong> or <strong>Fill in for me</strong>: also what Claude Code has saved on your Mac. Never during a call.</p>
           </div>
           <div>
             <h3><span class="lamp off"></span>Comes to us</h3>
@@ -155,7 +169,7 @@
         <ol class="steps stacked">
           <li>
             <h3>Install Claude Code and sign in</h3>
-            <p>Skip this if you already use it.</p>
+            <p>This line installs Claude Code. Skip it if you already use it.</p>
             <div class="cmd">
               <code>curl -fsSL https://claude.ai/install.sh | bash</code>
               <button class="copy" type="button" hidden>Copy</button>
@@ -168,7 +182,7 @@
               <code>curl -fsSL https://raw.githubusercontent.com/<wbr>aalishanjami/quickaside/<wbr>main/scripts/install.sh | bash</code>
               <button class="copy" type="button" hidden>Copy</button>
             </div>
-            <p>It needs no password. It installs to <code>~/Applications</code>, and checks the app's signature before it touches anything.</p>
+            <p>This line downloads Quickaside and installs it to <code>~/Applications</code>. It needs no password, and it checks the app's signature before it touches anything.</p>
           </li>
           <li>
             <h3>Follow the setup window</h3>
@@ -176,7 +190,7 @@
           </li>
         </ol>
       </div>
-      <p class="aside-note"><strong>Why a Terminal line?</strong> This project isn't in Apple's paid developer program, so macOS would block a browser download. If you'd rather download it, get the zip from <a href="https://github.com/aalishanjami/quickaside/releases/latest">Releases</a>, then allow it in System Settings &gt; Privacy &amp; Security &gt; Open Anyway. The app updates itself after that, and never during a call.</p>
+      <p class="aside-note"><strong>Why a Terminal line?</strong> This project isn't in Apple's paid developer program, so macOS would block a browser download. If you'd rather download it, get the zip from <a href="https://github.com/aalishanjami/quickaside/releases/latest">Releases</a>, then allow it in System Settings &gt; Privacy &amp; Security &gt; Open Anyway. The app downloads updates by itself after that, and installs them when you restart it, never during a call.</p>
     </section>
 
     <section class="wrap" aria-labelledby="know">
