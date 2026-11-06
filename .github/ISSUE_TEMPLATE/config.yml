@@ -1,0 +1,6 @@
+# Blank issues stay on: Report a problem in the app opens one, filled in.
+blank_issues_enabled: true
+contact_links:
+  - name: Security problem
+    url: https://github.com/aalishanjami/callaside/security/advisories/new
+    about: Please report these privately.

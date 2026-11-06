@@ -1,0 +1,72 @@
+Callaside
+Copyright (c) 2026 Aalishan Jami
+MIT License, see LICENSE.
+
+Callaside includes or uses the software below. Thanks to everyone who made it.
+
+Inside the app
+--------------
+
+Electron
+  Copyright (c) Electron contributors
+  Copyright (c) 2013-2020 GitHub Inc.
+  MIT License. Its own licence file ships with the app as LICENSE.electron.
+
+Chromium, Node.js and the libraries Electron includes
+  Many licences. The full list ships with the app as LICENSES.chromium.html.
+
+AudioTee and AudioTee.js
+  Copyright (C) 2025 Nick Payne
+  MIT License
+
+whisper.cpp and ggml, as whisper-server
+  Copyright (c) 2023-2026 The ggml authors
+  MIT License
+
+  whisper-server includes:
+
+  cpp-httplib
+    Copyright (c) 2025 Yuji Hirose
+    MIT License
+
+  JSON for Modern C++
+    Copyright (c) 2013-2022 Niels Lohmann
+    MIT License
+
+  miniaudio, by David Reid
+    Public domain or MIT No Attribution, used under MIT No Attribution
+
+  stb_vorbis, by Sean Barrett
+    Public domain
+
+Downloaded by the app, not included in it
+-----------------------------------------
+
+Whisper speech models
+  Copyright (c) 2022 OpenAI
+  MIT License
+  Converted to ggml format by the whisper.cpp project.
+
+The MIT License
+---------------
+
+Each component above marked MIT License is licensed under these terms, with its
+own copyright line above:
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

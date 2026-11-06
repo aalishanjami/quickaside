@@ -1,0 +1,16 @@
+name: Idea
+description: Something that would make calls easier
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What's getting in your way?
+      description: Tell us about the moment on a call when you wished this existed.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would help?
+      description: Rough is fine.

@@ -28,6 +28,11 @@ cp package.json "$APPDIR/"
 ditto src "$APPDIR/src"
 ditto node_modules/audiotee "$APPDIR/node_modules/audiotee"
 
+# The licences of what ships have to ship with it.
+mkdir -p "$RES/licenses"
+cp LICENSE NOTICE node_modules/electron/dist/LICENSES.chromium.html "$RES/licenses/"
+cp node_modules/electron/dist/LICENSE "$RES/licenses/LICENSE.electron"
+
 # These have to be in place before signing, so the signature covers them.
 HELPERS_DIR="$HELPERS" bash scripts/build-helpers.sh
 mkdir -p "$APPDIR/vendor/bin"
