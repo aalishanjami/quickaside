@@ -4,7 +4,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-OUT_DIR="${HELPERS_DIR:-$HOME/Library/Application Support/Callaside/bin}"
+OUT_DIR="${HELPERS_DIR:-$HOME/Library/Application Support/Quickaside/bin}"
 # The oldest macOS with Core Audio's process list. Without a target, swiftc
 # builds for the macOS it runs on, and the result won't load on older ones.
 TARGET="arm64-apple-macos14.2"

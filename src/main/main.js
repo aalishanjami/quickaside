@@ -22,7 +22,7 @@ const { spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-if (process.env.CALLASIDE_USER_DATA) app.setPath('userData', process.env.CALLASIDE_USER_DATA);
+if (process.env.QUICKASIDE_USER_DATA) app.setPath('userData', process.env.QUICKASIDE_USER_DATA);
 if (process.platform === 'linux' && process.getuid && process.getuid() === 0) app.commandLine.appendSwitch('no-sandbox');
 
 const { Settings } = require('./settings');
@@ -52,7 +52,7 @@ if (!app.requestSingleInstanceLock()) {
 }
 
 const userData = app.getPath('userData');
-app.setAppLogsPath(process.env.CALLASIDE_USER_DATA ? path.join(userData, 'logs') : undefined);
+app.setAppLogsPath(process.env.QUICKASIDE_USER_DATA ? path.join(userData, 'logs') : undefined);
 const log = new Log(app.getPath('logs'));
 crashReporter.start({ uploadToServer: false }); // dumps stay on this Mac
 process.on('uncaughtException', (err) => log.error('crash.exception', { error: err }));
@@ -60,9 +60,9 @@ process.on('unhandledRejection', (err) => log.error('crash.rejection', { error: 
 const modelsDir = path.join(userData, 'models');
 const settings = new Settings(userData);
 const testMode = {
-  them: process.env.CALLASIDE_TEST_AUDIO_THEM || null,
-  you: process.env.CALLASIDE_TEST_AUDIO_YOU || null,
-  speed: Number(process.env.CALLASIDE_TEST_SPEED || 1) || 1,
+  them: process.env.QUICKASIDE_TEST_AUDIO_THEM || null,
+  you: process.env.QUICKASIDE_TEST_AUDIO_YOU || null,
+  speed: Number(process.env.QUICKASIDE_TEST_SPEED || 1) || 1,
 };
 
 let win = null;
@@ -346,13 +346,13 @@ function makeSegmenter(source) {
 
 async function preflight() {
   const s = settings.get();
-  if (process.env.CALLASIDE_WHISPER_URL) return null;
+  if (process.env.QUICKASIDE_WHISPER_URL) return null;
   const m = getModel(s.whisperModel);
   if (!isDownloaded(modelsDir, s.whisperModel)) {
     return `Download the ${m ? m.label.toLowerCase() : ''} speech model first (Settings, Transcription).`;
   }
   const { server, cli } = await resolveWhisper();
-  if (!server && !cli) return 'Whisper is not installed. Run ./setup.sh in the callaside folder, then restart the app.';
+  if (!server && !cli) return 'Whisper is not installed. Run ./setup.sh in the quickaside folder, then restart the app.';
   return null;
 }
 
@@ -685,7 +685,7 @@ function toolPath(name) {
   return [bundledTool(name), path.join(userData, 'bin', name)].find((p) => fs.existsSync(p)) || null;
 }
 
-const calendar = new Calendar({ resolveBinary: () => process.env.CALLASIDE_CALENDAR || toolPath('calendar-helper'), log });
+const calendar = new Calendar({ resolveBinary: () => process.env.QUICKASIDE_CALENDAR || toolPath('calendar-helper'), log });
 
 async function currentEvent() {
   if (!settings.get().useCalendar) return null;
@@ -755,7 +755,7 @@ async function checkNotesAccess() {
 // ---------- call detection ----------
 
 function detectorPath() {
-  if (process.env.CALLASIDE_DETECTOR) return process.env.CALLASIDE_DETECTOR;
+  if (process.env.QUICKASIDE_DETECTOR) return process.env.QUICKASIDE_DETECTOR;
   return toolPath('call-detector');
 }
 
@@ -855,13 +855,13 @@ async function knowledgeOverview() {
 
 // ---------- updates ----------
 
-const testFeed = process.env.CALLASIDE_TEST_UPDATE_FEED; // a local stand-in for the update service
+const testFeed = process.env.QUICKASIDE_TEST_UPDATE_FEED; // a local stand-in for the update service
 const updater = new Updater({
   autoUpdater,
   repo: repoFromIssues(bugs.url),
   version: app.getVersion(),
   // Only a real build can update, and tests must never replace the app.
-  enabled: app.isPackaged && (!process.env.CALLASIDE_USER_DATA || !!testFeed),
+  enabled: app.isPackaged && (!process.env.QUICKASIDE_USER_DATA || !!testFeed),
   ...(testFeed ? { feed: testFeed, firstCheckMs: 2000 } : {}),
   isBusy: () => call.active || call.stopping || !!detector.current || !!draftJob || !!download || notesJobs.size > 0,
   log,
@@ -1045,7 +1045,7 @@ function createPanel({ show }) {
     frame: false,
     fullscreenable: false,
     acceptFirstMouse: true, // people click it from the call app, and the first click must count
-    title: 'Callaside',
+    title: 'Quickaside',
     backgroundColor: windowBackground(),
     webPreferences: preferences({ backgroundThrottling: false }),
   });
@@ -1117,7 +1117,7 @@ function createPrompt() {
     skipTaskbar: true,
     acceptFirstMouse: true,
     type: process.platform === 'darwin' ? 'panel' : undefined,
-    title: 'Callaside prompt',
+    title: 'Quickaside prompt',
     backgroundColor: windowBackground(),
     webPreferences: preferences(),
   });
@@ -1207,7 +1207,7 @@ function openSetup() {
     maximizable: false,
     fullscreenable: false,
     show: false,
-    title: 'Set up Callaside',
+    title: 'Set up Quickaside',
     titleBarStyle: 'hiddenInset',
     backgroundColor: windowBackground(),
     webPreferences: preferences(),
@@ -1271,7 +1271,7 @@ function createTray() {
   const icon = nativeImage.createFromPath(path.join(__dirname, '..', 'assets', 'trayTemplate.png'));
   icon.setTemplateImage(true);
   tray = new Tray(icon);
-  tray.setToolTip('Callaside');
+  tray.setToolTip('Quickaside');
   refreshTray();
 }
 
@@ -1292,7 +1292,7 @@ function refreshTray() {
       ]
     : [
         ...(settings.get().setupDone ? [] : [{ label: 'Finish setup', click: openSetup }]),
-        { label: 'Open Callaside', click: () => showPanel({ focus: true }) },
+        { label: 'Open Quickaside', click: () => showPanel({ focus: true }) },
         { label: start, click: () => startListening({ focus: true }) },
       ];
   tray.setContextMenu(
@@ -1304,7 +1304,7 @@ function refreshTray() {
       { label: 'Settings', click: () => openSettings() },
       { label: 'Report a problem', click: () => openSettings('help') },
       { type: 'separator' },
-      { label: 'Quit Callaside', click: () => app.quit() },
+      { label: 'Quit Quickaside', click: () => app.quit() },
     ])
   );
 }
@@ -1325,7 +1325,7 @@ function openSettings(section) {
     minWidth: MIN_WIDTH,
     minHeight: MIN_HEIGHT,
     show: false,
-    title: 'Callaside Settings',
+    title: 'Quickaside Settings',
     titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'default',
     trafficLightPosition: { x: 18, y: 18 },
     backgroundColor: windowBackground(),
@@ -1611,7 +1611,7 @@ app.whenReady().then(() => {
   log.info('app.start', { version: app.getVersion(), macos: process.getSystemVersion(), arch: process.arch, electron: process.versions.electron });
   if (process.platform === 'darwin' && app.dock) app.dock.hide(); // the installed app sets LSUIElement, this covers npm start
   // Updates can't replace an app running from a disk image.
-  if (app.isPackaged && !process.env.CALLASIDE_USER_DATA && !app.isInApplicationsFolder()) {
+  if (app.isPackaged && !process.env.QUICKASIDE_USER_DATA && !app.isInApplicationsFolder()) {
     try {
       if (app.moveToApplicationsFolder()) return;
     } catch (err) {

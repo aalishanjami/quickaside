@@ -29,7 +29,7 @@ The tests need no Mac, and they use fakes for `claude` and `whisper-cli`.
 To try it without a real call, give it two recordings. Leave pauses in them, because speech with no silence after it isn't transcribed until the call ends.
 
 ```bash
-CALLASIDE_TEST_AUDIO_THEM=them.wav CALLASIDE_TEST_AUDIO_YOU=you.wav npm start
+QUICKASIDE_TEST_AUDIO_THEM=them.wav QUICKASIDE_TEST_AUDIO_YOU=you.wav npm start
 ```
 
 If `setup.sh` prints `'mutex' file not found` or `'array' file not found`, your Command Line Tools have a leftover C++ folder from an older macOS. Setup works around it by itself, and falls back to `brew install whisper-cpp` if it can't.
@@ -53,7 +53,8 @@ These are promises to the people using the app:
 - App copy and docs use short, plain words and no em dashes.
 - Signal yellow is always a fill with ink on it. Use `--signal-text` for yellow words.
 - Shell scripts must run on bash 3.2, which is what macOS ships. No `mapfile` and no `${var,,}`.
-- Test settings start with `CALLASIDE_`, because a release drops every variable with that prefix.
+- Test settings start with `QUICKASIDE_`, because a release drops every variable with that prefix.
+- The website is in `site/`. Its privacy page is made from `PRIVACY.md`, so run `npm run site` after changing that file.
 
 ## Pull requests
 
@@ -80,7 +81,7 @@ To stop that, run this once:
 bash scripts/create-signing-identity.sh
 ```
 
-It makes a self-signed certificate that stays on this Mac, in a small private keychain at `~/Library/Application Support/Callaside/signing/`. Your login keychain, keychain search list and trust settings are not touched. Rebuild after it, allow the permissions one last time, and later builds keep them.
+It makes a self-signed certificate that stays on this Mac, in a small private keychain at `~/Library/Application Support/Quickaside/signing/`. Your login keychain, keychain search list and trust settings are not touched. Rebuild after it, allow the permissions one last time, and later builds keep them.
 
 To undo it, delete that folder. The next build goes back to ad-hoc signing. Keep the folder if you can: a new certificate counts as a new app, so macOS would ask once more.
 

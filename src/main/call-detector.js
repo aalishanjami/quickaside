@@ -37,7 +37,7 @@ const CALL_APPS = [
 ];
 
 // This app's own mic capture must never count as a call.
-const OWN_IDS = ['ai.callaside.app', 'com.github.Electron'];
+const OWN_IDS = ['io.github.aalishanjami.quickaside', 'com.github.Electron'];
 
 function callAppName(ids) {
   const others = ids.filter((id) => !OWN_IDS.some((own) => id.startsWith(own)));

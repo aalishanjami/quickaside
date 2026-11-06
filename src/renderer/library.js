@@ -1,7 +1,7 @@
 'use strict';
 
 (() => {
-  const api = window.callaside;
+  const api = window.quickaside;
   const $ = (id) => document.getElementById(id);
   const { el, toast } = window.ui;
 

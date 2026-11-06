@@ -1,15 +1,15 @@
 #!/bin/bash
-# Packs the app into "Callaside.app" in ~/Applications.
+# Packs the app into "Quickaside.app" in ~/Applications.
 # The bundle declares the microphone and system-audio permissions macOS asks
 # for, and carries whisper-server and the call detector. sign-mac-app.sh signs
 # it for this Mac. release-mac.sh uses BUILD_ONLY=1 and signs it for everyone.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-NAME="Callaside"
-BUNDLE_ID="${BUNDLE_ID:-ai.callaside.app}"
+NAME="Quickaside"
+BUNDLE_ID="${BUNDLE_ID:-io.github.aalishanjami.quickaside}"
 SRC_APP="node_modules/electron/dist/Electron.app"
-HELPERS="${HELPERS_DIR:-$HOME/Library/Application Support/Callaside/bin}"
+HELPERS="${HELPERS_DIR:-$HOME/Library/Application Support/Quickaside/bin}"
 
 [ "$(uname)" = "Darwin" ] || { echo "Run this on macOS."; exit 1; }
 [ -x node_modules/.bin/electron-fuses ] && [ -d node_modules/audiotee ] || npm install --no-fund --no-audit
@@ -54,9 +54,9 @@ plutil -replace CFBundleExecutable -string "$NAME" "$PLIST"
 plutil -replace CFBundleName -string "$NAME" "$PLIST"
 plutil -replace CFBundleDisplayName -string "$NAME" "$PLIST"
 plutil -replace CFBundleIdentifier -string "$BUNDLE_ID" "$PLIST"
-plutil -replace NSMicrophoneUsageDescription -string "Callaside transcribes your side of the call on this Mac." "$PLIST"
-plutil -replace NSAudioCaptureUsageDescription -string "Callaside transcribes the other side of the call on this Mac." "$PLIST"
-plutil -replace NSCalendarsFullAccessUsageDescription -string "Callaside reads the event you are in, to name the call and suggest the project." "$PLIST"
+plutil -replace NSMicrophoneUsageDescription -string "Quickaside transcribes your side of the call on this Mac." "$PLIST"
+plutil -replace NSAudioCaptureUsageDescription -string "Quickaside transcribes the other side of the call on this Mac." "$PLIST"
+plutil -replace NSCalendarsFullAccessUsageDescription -string "Quickaside reads the event you are in, to name the call and suggest the project." "$PLIST"
 plutil -replace LSUIElement -bool true "$PLIST" # lives in the menu bar, no Dock icon
 cp build/icon.icns "$RES/$NAME.icns" # drawn by scripts/make-icon.js
 rm -f "$RES/electron.icns"

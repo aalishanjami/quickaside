@@ -16,7 +16,7 @@ if (release && refuseLaunch(args)) {
 } else if (args.includes(CONNECTOR_FLAG)) {
   // Claude Code starts the server this way, beside the app or without it. It gets
   // its own folder, so it can't touch the running app's browser data.
-  app.setPath('userData', path.join(app.getPath('temp'), 'callaside-connector'));
+  app.setPath('userData', path.join(app.getPath('temp'), 'quickaside-connector'));
   app.disableHardwareAcceleration();
   const { serve, dataDirFrom } = require('../connector/server');
   serve(dataDirFrom(process.argv));

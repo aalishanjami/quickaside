@@ -1,14 +1,14 @@
 <p align="center"><img src="src/assets/icon.png" width="96" alt=""></p>
 
-<h1 align="center">Callaside</h1>
+<h1 align="center">Quickaside</h1>
 
 <p align="center"><strong>Answers while you're still on the call.</strong></p>
 
-Callaside is a side panel for your Mac. It transcribes your call as it happens, and when the other person asks something, an answer appears beside the call. Answers come from your own notes, through your own Claude Code.
+Quickaside is a side panel for your Mac. It transcribes your call as it happens, and when the other person asks something, an answer appears beside the call. Answers come from your own notes, through your own Claude Code.
 
 Note takers write things up after the call. This helps you during it.
 
-<p align="center"><img src="docs/panel.png" width="420" alt="The Callaside panel during a test call with a made-up client. A question about results from another client gets an answer that declines to give numbers it doesn't have. Below it, a question about the pilot gets the price from the project brief."></p>
+<p align="center"><img src="docs/panel.png" width="420" alt="The Quickaside panel during a test call with a made-up client. A question about results from another client gets an answer that declines to give numbers it doesn't have. Below it, a question about the pilot gets the price from the project brief."></p>
 
 <p align="center"><sub>A real test call, with a made-up client.</sub></p>
 
@@ -17,12 +17,12 @@ Note takers write things up after the call. This helps you during it.
 - **Keeps clients apart.** Pick a project, and answers use that client's brief first.
 - **Audio stays on your Mac.** Speech is transcribed here and audio is never saved. See [what leaves your Mac](PRIVACY.md).
 - **Writes it up after.** A summary, decisions, action items and a follow-up email, with every call searchable.
-- **Free and open source.** No Callaside account, no subscription and no server of ours. All you need is your Claude plan.
+- **Free and open source.** No Quickaside account, no subscription and no server of ours. All you need is your Claude plan.
 
 ## What you need
 
 - A Mac with Apple Silicon, on macOS 14.2 or later.
-- **A paid Claude plan.** Callaside runs on Claude Code, which needs a Pro, Max, Ultra, Team, Enterprise or Console account. The free plan doesn't include it. Each answer counts toward your plan's usage limits.
+- **A paid Claude plan.** Quickaside runs on Claude Code, which needs a Pro, Max, Ultra, Team, Enterprise or Console account. The free plan doesn't include it. Each answer counts toward your plan's usage limits.
 - About 1 GB of disk space, most of it for the speech model.
 
 ## Install
@@ -35,10 +35,10 @@ curl -fsSL https://claude.ai/install.sh | bash
 
 Then open a new Terminal window, run `claude` and log in.
 
-**2. Install Callaside.**
+**2. Install Quickaside.**
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/aalishanjami/callaside/main/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/aalishanjami/quickaside/main/scripts/install.sh | bash
 ```
 
 It needs no password. It installs to `~/Applications`, and checks the app's signature before it touches anything.
@@ -46,15 +46,15 @@ It needs no password. It installs to `~/Applications`, and checks the app's sign
 **3. Follow the setup window.** It checks Claude Code, downloads the speech model and tests your permissions. macOS asks for two, so allow both:
 
 - **Microphone**, for your side of the call.
-- **System audio recording**, for the other side. Setup plays a quiet tone to prove it works, because without this permission call audio is silent with no error. If you missed the prompt, go to System Settings > Privacy & Security > Screen & System Audio Recording > **System Audio Recording Only** and add Callaside.
+- **System audio recording**, for the other side. Setup plays a quiet tone to prove it works, because without this permission call audio is silent with no error. If you missed the prompt, go to System Settings > Privacy & Security > Screen & System Audio Recording > **System Audio Recording Only** and add Quickaside.
 
-**Why a Terminal line?** This project isn't in Apple's paid developer program, so macOS would block a browser download. If you'd rather download it, get the zip from [Releases](https://github.com/aalishanjami/callaside/releases), then allow it in System Settings > Privacy & Security > Open Anyway.
+**Why a Terminal line?** This project isn't in Apple's paid developer program, so macOS would block a browser download. If you'd rather download it, get the zip from [Releases](https://github.com/aalishanjami/quickaside/releases), then allow it in System Settings > Privacy & Security > Open Anyway.
 
 The app updates itself after that, and never during a call.
 
 ## Using it
 
-Callaside lives in the menu bar and has no Dock icon. Leave it running: it watches for calls and hears nothing until you press Start.
+Quickaside lives in the menu bar and has no Dock icon. Leave it running: it watches for calls and hears nothing until you press Start.
 
 1. When a call starts, a small prompt appears in the top right corner. Pick the project, then press **Start**, or press the `x` to skip this call.
 2. The panel opens, and answers land in it as soon as they ask something. The newest sits at the top in large type, close to your webcam, so you can read it while looking at them.
@@ -121,7 +121,7 @@ Open Settings > **Help** and press **Report a problem**. It shows exactly what w
 - **"Claude Code was not found"**: install it, or set its path in Settings > Advanced. It's usually `~/.local/bin/claude`.
 - **Your lines repeat what they said**: you're on speakers, and headphones fix it. The app drops most of these echoes.
 - **Transcription falls behind**: pick the Balanced or Fast model in Settings.
-- **No prompt when a call starts**: open the panel from the menu bar and press **Start now**. If your call app isn't spotted, please [tell us which one](https://github.com/aalishanjami/callaside/issues/new?template=bug.yml).
+- **No prompt when a call starts**: open the panel from the menu bar and press **Start now**. If your call app isn't spotted, please [tell us which one](https://github.com/aalishanjami/quickaside/issues/new?template=bug.yml).
 - **Can't find the app**: look in the menu bar for a dot with a curve beside it, or open the app again and the panel appears. Quit from that menu.
 
 ## Contributing
@@ -132,4 +132,4 @@ Building from source and house rules are in [CONTRIBUTING.md](CONTRIBUTING.md). 
 
 [MIT](LICENSE). Third-party credits are in [NOTICE](NOTICE).
 
-Callaside is an independent project. It is not made or endorsed by Anthropic, and it runs Claude Code under your own account. Claude is a trademark of Anthropic.
+Quickaside is an independent project. It is not made or endorsed by Anthropic, and it runs Claude Code under your own account. Claude is a trademark of Anthropic.

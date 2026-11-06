@@ -3,8 +3,8 @@
 <plist version="1.0">
 <dict>
   <key>CFBundleIdentifier</key>
-  <string>ai.callaside.app.calendar</string>
+  <string>io.github.aalishanjami.quickaside.calendar</string>
   <key>NSCalendarsFullAccessUsageDescription</key>
-  <string>Callaside reads the event you are in, to name the call and suggest the project.</string>
+  <string>Quickaside reads the event you are in, to name the call and suggest the project.</string>
 </dict>
 </plist>

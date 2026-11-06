@@ -2,5 +2,5 @@
 blank_issues_enabled: true
 contact_links:
   - name: Security problem
-    url: https://github.com/aalishanjami/callaside/security/advisories/new
+    url: https://github.com/aalishanjami/quickaside/security/advisories/new
     about: Please report these privately.

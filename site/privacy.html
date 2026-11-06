@@ -1,0 +1,102 @@
+<!doctype html>
+<!-- Made from PRIVACY.md by scripts/build-site.js. Change that file, not this one. -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'self'; base-uri 'none'; form-action 'none'">
+  <title>Privacy: Quickaside</title>
+  <meta name="description" content="What Quickaside keeps on your Mac, what leaves it, and how to delete it all.">
+  <meta name="theme-color" content="#ffd60a">
+  <link rel="canonical" href="https://quickaside.vercel.app/privacy.html">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon.png">
+  <link rel="stylesheet" href="site.css">
+</head>
+<body>
+  <header class="page-head">
+    <nav class="wrap nav" aria-label="Main">
+      <a class="brand" href="./">
+        <svg class="mark" viewBox="240 240 560 544" aria-hidden="true"><circle cx="429" cy="512" r="168"/><path d="M642.5 283.1A313 313 0 0 1 642.5 740.9"/></svg>
+        Quickaside
+      </a>
+      <div class="nav-links">
+        <a href="./#install">Install</a>
+        <a href="https://github.com/aalishanjami/quickaside">GitHub</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="wrap doc">
+<h1>Privacy</h1>
+<p><strong>The short version:</strong> Quickaside has no servers and no accounts, so this project collects nothing about you or your calls. Audio stays on your Mac and is never saved. Transcript text goes to Anthropic through your own Claude Code login when Claude answers.</p>
+<h2>What this project collects</h2>
+<p>Nothing. There are no analytics, no tracking and no crash uploads. We can't see your calls, your notes or who uses the app.</p>
+<p>This website has no cookies, no analytics and no forms, and it loads nothing from other sites. The company hosting it can see your IP address, as with any website.</p>
+<h2>What's kept on your Mac</h2>
+<div class="table"><table>
+<thead><tr><th>What</th><th>Where</th><th>How long</th></tr></thead>
+<tbody>
+<tr><td>Audio</td><td>Memory only</td><td>Gone once it's transcribed</td></tr>
+<tr><td>Transcripts, answers and notes</td><td><code>~/Library/Application Support/Quickaside/calls</code>, with a markdown copy in your save folder</td><td>Until you delete them</td></tr>
+<tr><td>Your profile, projects and settings</td><td><code>~/Library/Application Support/Quickaside/settings.json</code></td><td>Until you delete them</td></tr>
+<tr><td>Logs</td><td><code>~/Library/Logs/Quickaside</code></td><td>Up to about 2 MB, then the oldest goes</td></tr>
+<tr><td>Crash reports</td><td><code>~/Library/Application Support/Quickaside</code></td><td>Until you delete them</td></tr>
+</tbody>
+</table></div>
+<p>The app does not encrypt these files. They are as safe as your macOS account, so turn on FileVault.</p>
+<p>Logs hold states, counts and timings. They never hold transcripts, answers, notes or prompts.</p>
+<p>If the app falls back to <code>whisper-cli</code>, each short piece of audio sits in a temporary file until it's transcribed, then it's deleted. The normal path writes no audio to disk at all.</p>
+<h2>What leaves your Mac</h2>
+<p><strong>To Anthropic, through your own Claude Code login.</strong> This is the main one. When Claude answers a question, writes notes or drafts something for you, it receives:</p>
+<ul>
+<li>The transcript of the call, or the calls you ask about</li>
+<li>Your questions and your notepad</li>
+<li>Your profile, and the project brief and files in use</li>
+<li>Any notes it reads from your notes folder to answer</li>
+</ul>
+<p>With <strong>Answer every question they ask</strong> on, which is the default, this happens during the call without you pressing anything.</p>
+<p>Anthropic's terms and your account's privacy settings decide how long this is kept and how it's used, and those depend on your plan. Check them before you use this on confidential calls. See <a href="https://www.anthropic.com/legal/privacy">Anthropic's privacy policy</a>.</p>
+<p><strong>To check for updates.</strong> The app sends its version and platform to <code>update.electronjs.org</code>, a free service run by the Electron project. Updates download from GitHub. Both can see your IP address.</p>
+<p><strong>To download the speech model.</strong> It comes from Hugging Face, which can see your IP address.</p>
+<p><strong>When you choose to.</strong> <strong>Report a problem</strong> opens a public GitHub issue in your browser. It shows you what would be shared first, and you send it yourself. Don't post anything private there.</p>
+<p><strong>The connector, if you turn it on.</strong> Your own Claude Code or Claude Desktop can then read your saved calls. What it reads goes to Anthropic through your account, as with anything else you share with Claude. It's off until you turn it on.</p>
+<p><strong>The calendar, if you turn it on.</strong> The app reads the event you're in, to name the call and match the project. It's off by default. The title and attendee names are saved with the call, so they reach Claude when you ask across your calls.</p>
+<h2>The people on your calls</h2>
+<p>Their words are transcribed, saved on your Mac and sent to Anthropic through your account, and they didn't install this app. That makes you responsible for telling them.</p>
+<ul>
+<li>Laws differ by place, and some places require everyone's consent. This page is not legal advice.</li>
+<li>The app reminds you when a call starts, and has a line you can copy into the meeting chat.</li>
+<li>If someone asks you to stop, press <strong>Pause</strong>. Nothing said while paused is transcribed.</li>
+<li>If someone asks you to delete a call, delete it in <strong>Past calls</strong>.</li>
+</ul>
+<h2>Your choices</h2>
+<ul>
+<li><strong>Save each call</strong>: turn it off under Privacy and nothing is kept, with no transcript, no file and no notes.</li>
+<li><strong>Answer every question they ask</strong>: turn it off, and Claude doesn't see the call until you ask something or the notes are written.</li>
+<li><strong>Write notes after each call</strong>: turn it off, and nothing goes to Claude when the call ends.</li>
+<li><strong>Pause</strong>: stops transcribing for as long as you need.</li>
+<li><strong>Past calls</strong>: delete any call. Check your save folder too, because the markdown copy is yours to keep or delete.</li>
+<li><strong>Notes folder</strong>: Claude reads only this folder and the files you added, and you can skip it.</li>
+</ul>
+<p>Deleting a call here doesn't delete what Anthropic already received. Your Claude account settings cover that.</p>
+<h2>Removing everything</h2>
+<ol>
+<li>Quit Quickaside from the menu bar.</li>
+<li>If you connected it, run <code>claude mcp remove quickaside --scope user</code>, and remove the extension in Claude Desktop.</li>
+<li>Delete <code>~/Applications/Quickaside.app</code>.</li>
+<li>Delete <code>~/Library/Application Support/Quickaside</code> and <code>~/Library/Logs/Quickaside</code>.</li>
+<li>Delete your save folder, which is <code>~/Documents/Quickaside</code> unless you changed it.</li>
+<li>Remove the app from System Settings &gt; Privacy &amp; Security, under Microphone and Screen &amp; System Audio Recording.</li>
+</ol>
+<h2>Changes and questions</h2>
+<p>If this changes, the change will show in this file's history and in the <a href="https://github.com/aalishanjami/quickaside/blob/main/CHANGELOG.md">changelog</a>. Questions are welcome in <a href="https://github.com/aalishanjami/quickaside/issues">GitHub issues</a>, which are public, so please keep private details out.</p>
+  </main>
+
+  <footer class="foot">
+    <div class="wrap">
+      <p>Quickaside is an independent project under the MIT licence. It is not made or endorsed by Anthropic, and it runs Claude Code under your own account. Claude is a trademark of Anthropic.</p>
+    </div>
+  </footer>
+</body>
+</html>

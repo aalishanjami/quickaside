@@ -7,8 +7,8 @@
 set -euo pipefail
 
 VERSION="${WHISPER_VERSION:-v1.9.5}"
-DATA="$HOME/Library/Application Support/Callaside"
-SRC="$HOME/.callaside/whisper.cpp-$VERSION"
+DATA="$HOME/Library/Application Support/Quickaside"
+SRC="$HOME/.quickaside/whisper.cpp-$VERSION"
 CLT_CXX_DIR="/Library/Developer/CommandLineTools/usr/include/c++"
 
 CXX_BIN="${CXX:-}"

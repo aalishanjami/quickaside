@@ -11,7 +11,7 @@ const { _electron: electron } = require('playwright');
 const { SCRIPT, makeCallAudio, startMockWhisper } = require('./fixtures');
 
 const root = path.join(__dirname, '..', '..');
-const outDir = process.argv[2] || fs.mkdtempSync(path.join(os.tmpdir(), 'callaside-e2e-'));
+const outDir = process.argv[2] || fs.mkdtempSync(path.join(os.tmpdir(), 'quickaside-e2e-'));
 
 function log(...a) {
   console.log(`[e2e ${new Date().toISOString().slice(11, 19)}]`, ...a);
@@ -45,12 +45,12 @@ function log(...a) {
   const realMic = process.env.E2E_REAL_MIC === '1';
   const env = {
     ...process.env,
-    CALLASIDE_USER_DATA: userData,
-    CALLASIDE_WHISPER_URL: whisper.url,
-    CALLASIDE_TEST_AUDIO_THEM: themFile,
-    CALLASIDE_TEST_SPEED: realMic ? '1' : process.env.E2E_SPEED || '2',
+    QUICKASIDE_USER_DATA: userData,
+    QUICKASIDE_WHISPER_URL: whisper.url,
+    QUICKASIDE_TEST_AUDIO_THEM: themFile,
+    QUICKASIDE_TEST_SPEED: realMic ? '1' : process.env.E2E_SPEED || '2',
   };
-  if (!realMic) env.CALLASIDE_TEST_AUDIO_YOU = youFile;
+  if (!realMic) env.QUICKASIDE_TEST_AUDIO_YOU = youFile;
   const micArgs = realMic
     ? ['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream', `--use-file-for-fake-audio-capture=${youFile}%noloop`]
     : [];

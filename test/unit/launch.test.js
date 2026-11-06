@@ -26,13 +26,13 @@ test('a public build refuses anything that could run outside code', () => {
 
 test('a public build still opens normally, and for Claude Code', () => {
   assert.strictEqual(refuseLaunch([]), false);
-  assert.strictEqual(refuseLaunch([CONNECTOR_FLAG, '--data', '/Users/a/Library/Application Support/Callaside']), false);
+  assert.strictEqual(refuseLaunch([CONNECTOR_FLAG, '--data', '/Users/a/Library/Application Support/Quickaside']), false);
   assert.strictEqual(refuseLaunch(['-psn_0_12345']), false);
   assert.strictEqual(refuseLaunch(['-NSDocumentRevisionsDebugMode', 'YES']), false);
 });
 
 test('test variables are dropped, and nothing else', () => {
-  const env = { CALLASIDE_DETECTOR: '/tmp/evil', CALLASIDE_USER_DATA: '/tmp/x', PATH: '/usr/bin', HOME: '/Users/a' };
+  const env = { QUICKASIDE_DETECTOR: '/tmp/evil', QUICKASIDE_USER_DATA: '/tmp/x', PATH: '/usr/bin', HOME: '/Users/a' };
   dropTestEnv(env);
   assert.deepStrictEqual(env, { PATH: '/usr/bin', HOME: '/Users/a' });
 });

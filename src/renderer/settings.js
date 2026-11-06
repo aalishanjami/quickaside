@@ -1,13 +1,13 @@
 'use strict';
 
 (() => {
-  const api = window.callaside;
+  const api = window.quickaside;
   const $ = (id) => document.getElementById(id);
   const { el, basename, tildify, toast } = window.ui;
 
   const FOLDER_ISSUES = {
     checking: 'Waiting for you to answer the macOS prompt. Answers skip this folder until then.',
-    blocked: 'macOS is blocking this folder, so answers skip it. Allow Callaside in System Settings > Privacy & Security > Files & Folders.',
+    blocked: 'macOS is blocking this folder, so answers skip it. Allow Quickaside in System Settings > Privacy & Security > Files & Folders.',
     missing: 'This folder no longer exists, so answers skip it. Choose another one.',
   };
 

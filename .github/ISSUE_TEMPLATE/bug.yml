@@ -5,7 +5,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for reporting this. Please leave out real transcripts, client names and anything else private. Security problems go through [SECURITY.md](https://github.com/aalishanjami/callaside/blob/main/SECURITY.md) instead.
+        Thanks for reporting this. Please leave out real transcripts, client names and anything else private. Security problems go through [SECURITY.md](https://github.com/aalishanjami/quickaside/blob/main/SECURITY.md) instead.
   - type: textarea
     id: what
     attributes:
@@ -28,7 +28,7 @@ body:
     id: report
     attributes:
       label: Report a problem output
-      description: In Callaside, open Settings > Help, press Copy all and paste it here. It holds versions, status and the recent log, and never transcripts. Check it before you send it.
+      description: In Quickaside, open Settings > Help, press Copy all and paste it here. It holds versions, status and the recent log, and never transcripts. Check it before you send it.
       render: text
     validations:
       required: true

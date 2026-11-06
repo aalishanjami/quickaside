@@ -38,10 +38,10 @@ function bundleManifest({ version, dataDir }) {
   return {
     manifest_version: '0.3',
     name: NAME,
-    display_name: 'Callaside',
+    display_name: 'Quickaside',
     version,
     description: 'Search your saved calls, transcripts and notes. Read only, and it runs on this Mac.',
-    author: { name: 'Callaside' },
+    author: { name: 'Quickaside' },
     icon: 'icon.png',
     server: {
       type: 'node',
@@ -110,7 +110,7 @@ class Connector {
   async buildBundle() {
     const folder = path.join(this.dataDir, 'connector');
     const stage = path.join(folder, 'bundle');
-    const file = path.join(folder, 'Callaside.mcpb');
+    const file = path.join(folder, 'Quickaside.mcpb');
     stageBundle(stage, { version: this.version, dataDir: this.dataDir });
     fs.rmSync(file, { force: true });
     // -D leaves out folder entries: the mcpb unpacker fails on them, so ditto won't do.

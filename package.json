@@ -1,13 +1,13 @@
 {
-  "name": "callaside",
-  "productName": "Callaside",
+  "name": "quickaside",
+  "productName": "Quickaside",
   "version": "0.1.0",
   "description": "A side panel that transcribes your call on your Mac and answers questions with your own Claude Code login. No API keys.",
   "main": "src/main/index.js",
   "private": true,
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/aalishanjami/callaside/issues"
+    "url": "https://github.com/aalishanjami/quickaside/issues"
   },
   "scripts": {
     "start": "electron .",
@@ -15,6 +15,7 @@
     "build:whisper": "bash scripts/build-whisper.sh",
     "build:app": "bash scripts/build-mac-app.sh",
     "icon": "electron scripts/make-icon.js",
+    "site": "node scripts/build-site.js",
     "test": "node --test test/unit/*.test.js"
   },
   "dependencies": {

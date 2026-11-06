@@ -14,7 +14,7 @@ function refuseLaunch(args) {
 
 function dropTestEnv(env) {
   for (const key of Object.keys(env)) {
-    if (key.startsWith('CALLASIDE_')) delete env[key];
+    if (key.startsWith('QUICKASIDE_')) delete env[key];
   }
 }
 

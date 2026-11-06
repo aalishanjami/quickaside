@@ -1,20 +1,22 @@
 # Privacy
 
-**The short version:** Callaside has no servers and no accounts, so this project collects nothing about you or your calls. Audio stays on your Mac and is never saved. Transcript text goes to Anthropic through your own Claude Code login when Claude answers.
+**The short version:** Quickaside has no servers and no accounts, so this project collects nothing about you or your calls. Audio stays on your Mac and is never saved. Transcript text goes to Anthropic through your own Claude Code login when Claude answers.
 
 ## What this project collects
 
 Nothing. There are no analytics, no tracking and no crash uploads. We can't see your calls, your notes or who uses the app.
+
+This website has no cookies, no analytics and no forms, and it loads nothing from other sites. The company hosting it can see your IP address, as with any website.
 
 ## What's kept on your Mac
 
 | What | Where | How long |
 | --- | --- | --- |
 | Audio | Memory only | Gone once it's transcribed |
-| Transcripts, answers and notes | `~/Library/Application Support/Callaside/calls`, with a markdown copy in your save folder | Until you delete them |
-| Your profile, projects and settings | `~/Library/Application Support/Callaside/settings.json` | Until you delete them |
-| Logs | `~/Library/Logs/Callaside` | Up to about 2 MB, then the oldest goes |
-| Crash reports | `~/Library/Application Support/Callaside` | Until you delete them |
+| Transcripts, answers and notes | `~/Library/Application Support/Quickaside/calls`, with a markdown copy in your save folder | Until you delete them |
+| Your profile, projects and settings | `~/Library/Application Support/Quickaside/settings.json` | Until you delete them |
+| Logs | `~/Library/Logs/Quickaside` | Up to about 2 MB, then the oldest goes |
+| Crash reports | `~/Library/Application Support/Quickaside` | Until you delete them |
 
 The app does not encrypt these files. They are as safe as your macOS account, so turn on FileVault.
 
@@ -67,13 +69,13 @@ Deleting a call here doesn't delete what Anthropic already received. Your Claude
 
 ## Removing everything
 
-1. Quit Callaside from the menu bar.
-2. If you connected it, run `claude mcp remove callaside --scope user`, and remove the extension in Claude Desktop.
-3. Delete `~/Applications/Callaside.app`.
-4. Delete `~/Library/Application Support/Callaside` and `~/Library/Logs/Callaside`.
-5. Delete your save folder, which is `~/Documents/Callaside` unless you changed it.
+1. Quit Quickaside from the menu bar.
+2. If you connected it, run `claude mcp remove quickaside --scope user`, and remove the extension in Claude Desktop.
+3. Delete `~/Applications/Quickaside.app`.
+4. Delete `~/Library/Application Support/Quickaside` and `~/Library/Logs/Quickaside`.
+5. Delete your save folder, which is `~/Documents/Quickaside` unless you changed it.
 6. Remove the app from System Settings > Privacy & Security, under Microphone and Screen & System Audio Recording.
 
 ## Changes and questions
 
-If this changes, the change will show in this file's history and in the [changelog](CHANGELOG.md). Questions are welcome in [GitHub issues](https://github.com/aalishanjami/callaside/issues), which are public, so please keep private details out.
+If this changes, the change will show in this file's history and in the [changelog](CHANGELOG.md). Questions are welcome in [GitHub issues](https://github.com/aalishanjami/quickaside/issues), which are public, so please keep private details out.

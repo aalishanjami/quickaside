@@ -8,7 +8,7 @@
 set -euo pipefail
 
 APP="$1"
-SIGN_DIR="$HOME/Library/Application Support/Callaside/signing"
+SIGN_DIR="$HOME/Library/Application Support/Quickaside/signing"
 KEYCHAIN="$SIGN_DIR/signing.keychain-db"
 PASSWORD_FILE="$SIGN_DIR/keychain-password"
 

@@ -1,7 +1,7 @@
 #!/bin/bash
-# Installs Callaside from the latest release on GitHub:
+# Installs Quickaside from the latest release on GitHub:
 #
-#   curl -fsSL https://raw.githubusercontent.com/aalishanjami/callaside/main/scripts/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/aalishanjami/quickaside/main/scripts/install.sh | bash
 #
 # The app isn't notarized by Apple. A file fetched by curl has no quarantine flag,
 # so macOS opens it without the "could not verify" block a browser download gets.
@@ -9,11 +9,11 @@
 # certificate. It needs no password, because it installs for this user only.
 set -euo pipefail
 
-NAME="Callaside"
-BUNDLE_ID="ai.callaside.app"
-REPO="aalishanjami/callaside"
-CERT="d5f63df75e4fd02dcde7595b3c197ae7b4067dd2"
-RELEASES="${CALLASIDE_RELEASES:-https://github.com/$REPO/releases}"
+NAME="Quickaside"
+BUNDLE_ID="io.github.aalishanjami.quickaside"
+REPO="aalishanjami/quickaside"
+CERT="9478fed10fad14f8a5233a81b72e52fe47bbb6c9"
+RELEASES="${QUICKASIDE_RELEASES:-https://github.com/$REPO/releases}"
 DEST="$HOME/Applications"
 QUIT_WAIT_SECONDS=30
 

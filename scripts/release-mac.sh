@@ -22,7 +22,7 @@ VERSION="$(node -p "require('./package.json').version")"
 SLUG="${NAME// /-}"
 APP="dist/$NAME.app"
 OUT="dist/release"
-SIGN_DIR="$HOME/Library/Application Support/Callaside/signing"
+SIGN_DIR="$HOME/Library/Application Support/Quickaside/signing"
 KEYCHAIN="$SIGN_DIR/signing.keychain-db"
 CERT="$(sed -n 's/^CERT="\(.*\)"$/\1/p' scripts/install.sh)"
 

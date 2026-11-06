@@ -317,7 +317,7 @@ test('the bundle for Claude Desktop runs on its own', async () => {
 });
 
 test('Claude Code starts the server through the app, never as plain Node', () => {
-  const command = '/Apps/Callaside.app/Contents/MacOS/Callaside';
+  const command = '/Apps/Quickaside.app/Contents/MacOS/Quickaside';
   const built = serverConfig({ execPath: command, appPath: '/Apps/res/app', packaged: true, dataDir: '/data dir' });
   assert.strictEqual(built.command, command);
   assert.deepStrictEqual(built.args, ['--connector', '--data', '/data dir']);

@@ -1,7 +1,7 @@
 'use strict';
 
 (() => {
-  const api = window.callaside;
+  const api = window.quickaside;
   const $ = (id) => document.getElementById(id);
   const BROWSERS = new Set(['Chrome', 'Safari', 'Arc', 'Brave', 'Edge', 'Firefox', 'Opera']);
 

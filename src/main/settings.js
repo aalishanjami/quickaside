@@ -44,7 +44,7 @@ function defaults() {
     consentReminder: true, // remind the user to tell people, when each call starts
     theme: 'system', // system | light | dark
     saveTranscripts: true,
-    saveFolder: path.join(os.homedir(), 'Documents', 'Callaside'),
+    saveFolder: path.join(os.homedir(), 'Documents', 'Quickaside'),
     shortcut: 'CommandOrControl+Shift+Space',
     // Advanced overrides
     claudePath: '',

@@ -1,5 +1,5 @@
 #!/bin/bash
-# One-time setup for Callaside on macOS 14.2 or later.
+# One-time setup for Quickaside on macOS 14.2 or later.
 # Run it from Terminal.app:  bash setup.sh
 # Safe to run again: finished steps are skipped or redone quickly.
 set -euo pipefail
@@ -53,7 +53,7 @@ if [ "$(sysctl -in hw.optional.arm64 2>/dev/null || echo 0)" = "1" ]; then
 else
   MODEL="ggml-base.en.bin"
 fi
-MODELS="$HOME/Library/Application Support/Callaside/models"
+MODELS="$HOME/Library/Application Support/Quickaside/models"
 mkdir -p "$MODELS"
 if [ -s "$MODELS/$MODEL" ]; then
   echo "Already have $MODEL"
@@ -62,11 +62,11 @@ else
   mv "$MODELS/$MODEL.part" "$MODELS/$MODEL"
 fi
 
-step "5/5 Building Callaside.app"
+step "5/5 Building Quickaside.app"
 bash scripts/build-mac-app.sh
 
 step "Done"
-echo "Open it with:  open \"$HOME/Applications/Callaside.app\""
+echo "Open it with:  open \"$HOME/Applications/Quickaside.app\""
 echo "It lives in the menu bar and offers to start when a call begins."
 echo "macOS will ask for microphone and system audio access on your first call."
 if [ "$WHISPER_MODE" = "cli" ]; then

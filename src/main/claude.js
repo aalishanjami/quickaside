@@ -23,7 +23,7 @@ class ClaudeSession extends EventEmitter {
     this.getEnv = getEnv;
     this.getConfig = getConfig; // () => { model, effort, systemPrompt, folderAccess, folder }
     this.buildMessage = buildMessage; // (item, { fresh }) => string
-    this.scratchDir = scratchDir || path.join(os.tmpdir(), 'callaside');
+    this.scratchDir = scratchDir || path.join(os.tmpdir(), 'quickaside');
     this.proc = null;
     this.queue = [];
     this.current = null;

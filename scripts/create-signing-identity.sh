@@ -1,6 +1,6 @@
 #!/bin/bash
 # One-time, optional step. Makes a self-signed code signing certificate so
-# rebuilds of Callaside keep their macOS permissions.
+# rebuilds of Quickaside keep their macOS permissions.
 #
 # Everything goes in one folder of its own. The login keychain, the keychain
 # search list and system trust settings are left alone. To undo it, delete
@@ -10,7 +10,7 @@ umask 077
 
 [ "$(uname)" = "Darwin" ] || { echo "Run this on macOS."; exit 1; }
 
-SIGN_DIR="$HOME/Library/Application Support/Callaside/signing"
+SIGN_DIR="$HOME/Library/Application Support/Quickaside/signing"
 KEYCHAIN="$SIGN_DIR/signing.keychain-db"
 PASSWORD_FILE="$SIGN_DIR/keychain-password"
 # Homebrew's OpenSSL 3 writes a .p12 that `security import` cannot read.
@@ -41,7 +41,7 @@ x509_extensions = ext
 prompt = no
 
 [dn]
-CN = Callaside
+CN = Quickaside
 
 [ext]
 basicConstraints = critical, CA:FALSE

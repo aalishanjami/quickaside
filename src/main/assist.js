@@ -26,7 +26,7 @@ const MAX_SUGGESTIONS = 8;
 
 function buildDraft({ fields, current, contextDocs, folder, project }) {
   const system = [
-    'You fill in the settings of Callaside, an app that answers questions live on the user\'s calls.',
+    'You fill in the settings of Quickaside, an app that answers questions live on the user\'s calls.',
     'Work only from the sources you are given. Never invent facts, clients, numbers or results. Keep numbers and status exactly as written.',
     'If the sources say nothing for a field, return an empty value for it.',
     'Keep anything in <current_settings> that the sources do not contradict.',

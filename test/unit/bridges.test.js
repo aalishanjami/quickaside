@@ -182,7 +182,7 @@ test('transcriber posts WAV segments to a whisper-server compatible endpoint', a
     });
   });
   await new Promise((r) => srv.listen(0, '127.0.0.1', r));
-  process.env.CALLASIDE_WHISPER_URL = `http://127.0.0.1:${srv.address().port}`;
+  process.env.QUICKASIDE_WHISPER_URL = `http://127.0.0.1:${srv.address().port}`;
   const t = new Transcriber({ resolveBinaries: async () => ({}), getEnv: async () => process.env });
   const lines = [];
   t.on('line', (l) => lines.push(l));
@@ -196,7 +196,7 @@ test('transcriber posts WAV segments to a whisper-server compatible endpoint', a
     assert.strictEqual(lines.length, 1, 'blank audio result is dropped');
     assert.strictEqual(lines[0].text, 'Hello from the other side.');
   } finally {
-    delete process.env.CALLASIDE_WHISPER_URL;
+    delete process.env.QUICKASIDE_WHISPER_URL;
     await t.stop();
     srv.close();
   }

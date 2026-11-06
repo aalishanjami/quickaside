@@ -54,7 +54,7 @@ async function main() {
   const win = new BrowserWindow({ show: false });
   await win.loadURL('about:blank');
 
-  const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'callaside-icon-'));
+  const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'quickaside-icon-'));
   const iconset = path.join(temp, 'icon.iconset');
   fs.mkdirSync(iconset);
   for (const [name, svg, size] of ICONSET) await draw(win, svg, size, path.join(iconset, name));

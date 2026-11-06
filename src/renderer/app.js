@@ -1,7 +1,7 @@
 'use strict';
 
 (() => {
-  const api = window.callaside;
+  const api = window.quickaside;
   const $ = (id) => document.getElementById(id);
   const { el, basename, tildify, modelName, toast, usableProjects, fillProjects } = window.ui;
 
@@ -246,7 +246,7 @@
     $('cueZone').hidden = idle;
     $('answersEmpty').hidden = !empty || idle;
     document.body.classList.toggle('paused', !!call.paused);
-    $('headTitle').textContent = call.paused ? 'Paused' : call.active ? call.title || call.app || 'Listening' : ended ? 'Ended' : 'Callaside';
+    $('headTitle').textContent = call.paused ? 'Paused' : call.active ? call.title || call.app || 'Listening' : ended ? 'Ended' : 'Quickaside';
     $('listeningSub').textContent = s.autoAnswer ? 'Answers land here as soon as they ask a question.' : 'Press Answer them when you need the words.';
     $('answersEmpty').querySelector('.listening-title').textContent = call.active ? 'Listening.' : 'No answers from this call.';
     $('askInput').placeholder = idle ? 'Ask something before the call' : 'Ask about this call';
@@ -508,7 +508,7 @@
     else if (st.system.hint === 'silent' && st.call.active) {
       add(
         'warn',
-        'No call audio yet. If the other side is talking, open System Settings > Privacy & Security > Screen & System Audio Recording and allow Callaside under System Audio Recording Only.'
+        'No call audio yet. If the other side is talking, open System Settings > Privacy & Security > Screen & System Audio Recording and allow Quickaside under System Audio Recording Only.'
       );
     }
     if (st.mic.state === 'error' && st.mic.error) add('warn', `Microphone: ${st.mic.error}`);
@@ -548,7 +548,7 @@
   async function startMic(deviceId) {
     try {
       const ok = await api.ensureMicAccess();
-      if (!ok) throw new Error('Access is off. Allow Callaside in System Settings > Privacy & Security > Microphone.');
+      if (!ok) throw new Error('Access is off. Allow Quickaside in System Settings > Privacy & Security > Microphone.');
       state.mic = await window.MicCapture.start(deviceId, (buf) => api.micPcm(buf));
       api.micState({ state: 'on' });
     } catch (err) {

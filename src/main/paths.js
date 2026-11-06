@@ -61,7 +61,7 @@ function loginShellPath() {
   shellPathPromise = new Promise((resolve) => {
     if (process.platform === 'win32') return resolve(process.env.PATH || '');
     const shell = process.env.SHELL || '/bin/zsh';
-    const marker = '__CALLASIDE_PATH__';
+    const marker = '__QUICKASIDE_PATH__';
     execFile(
       shell,
       ['-ilc', `printf '${marker}%s${marker}' "$PATH"`],

@@ -53,7 +53,7 @@ class Transcriber extends EventEmitter {
     this.cfgKey = key;
     this._setStatus({ state: 'starting', mode: null, error: null });
     try {
-      const external = process.env.CALLASIDE_WHISPER_URL;
+      const external = process.env.QUICKASIDE_WHISPER_URL;
       if (external) {
         this.mode = 'external';
         this.baseUrl = external.replace(/\/$/, '');
@@ -70,7 +70,7 @@ class Transcriber extends EventEmitter {
           this.mode = 'cli';
           this.cliPath = cli;
         } else {
-          throw new Error('Whisper is not installed. Run ./setup.sh in the callaside folder.');
+          throw new Error('Whisper is not installed. Run ./setup.sh in the quickaside folder.');
         }
       }
       this._setStatus({ state: 'ready', mode: this.mode, error: null });
@@ -183,7 +183,7 @@ class Transcriber extends EventEmitter {
   }
 
   async _transcribeCli(wav) {
-    const base = path.join(os.tmpdir(), `callaside-${process.pid}-${++this.counter}`);
+    const base = path.join(os.tmpdir(), `quickaside-${process.pid}-${++this.counter}`);
     const wavPath = `${base}.wav`;
     fs.writeFileSync(wavPath, wav);
     const args = [

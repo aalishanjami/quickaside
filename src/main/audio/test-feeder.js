@@ -5,7 +5,7 @@ const { decodeWav } = require('./wav');
 
 // Plays a WAV file into a segmenter in real time (or faster), standing in for
 // the microphone or call audio. Used for testing without a live call:
-//   CALLASIDE_TEST_AUDIO_THEM=/path/them.wav CALLASIDE_TEST_AUDIO_YOU=/path/you.wav npm start
+//   QUICKASIDE_TEST_AUDIO_THEM=/path/them.wav QUICKASIDE_TEST_AUDIO_YOU=/path/you.wav npm start
 
 class WavFeeder {
   constructor(file, { speed = 1, chunkMs = 100 } = {}) {

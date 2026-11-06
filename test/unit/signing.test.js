@@ -22,7 +22,7 @@ const TOOLS = {
   find-identity)
     echo "Policy: Code Signing"
     echo "  Matching identities"
-    [ -n "$FAKE_NO_IDENTITY" ] || echo "  1) ${HASH} \\"Callaside\\" (CSSMERR_TP_NOT_TRUSTED)"
+    [ -n "$FAKE_NO_IDENTITY" ] || echo "  1) ${HASH} \\"Quickaside\\" (CSSMERR_TP_NOT_TRUSTED)"
     ;;
   unlock-keychain) [ -z "$FAKE_LOCKED" ] || exit 1 ;;
   list-keychains)
@@ -57,7 +57,7 @@ function sandbox() {
   for (const [name, body] of Object.entries(TOOLS)) {
     fs.writeFileSync(path.join(bin, name), `#!/bin/bash\n${body}`, { mode: 0o755 });
   }
-  const signDir = path.join(home, 'Library/Application Support/Callaside/signing');
+  const signDir = path.join(home, 'Library/Application Support/Quickaside/signing');
   const log = path.join(root, 'calls.log');
   fs.writeFileSync(log, '');
   const run = (script, args = [], env = {}) => {

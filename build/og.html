@@ -1,0 +1,18 @@
+<!doctype html>
+<!-- Draws site/og.png, the picture shown when the site is shared. Serve site/ with this
+     file in it, then take a 1200x630 screenshot, for example with Chrome's headless mode. -->
+<meta charset="utf-8">
+<title>Quickaside share image</title>
+<style>
+  html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; background: #ffd60a; color: #14160f; font-family: 'Avenir Next', sans-serif; -webkit-font-smoothing: antialiased; }
+  .brand { position: absolute; left: 72px; top: 60px; display: flex; align-items: center; gap: 14px; font-size: 34px; font-weight: 700; }
+  .brand svg { width: 40px; height: 40px; fill: currentColor; }
+  .brand path { fill: none; stroke: currentColor; stroke-width: 90; stroke-linecap: round; }
+  h1 { position: absolute; left: 72px; top: 164px; width: 640px; margin: 0; font-size: 88px; font-weight: 600; line-height: 1.02; letter-spacing: -0.025em; }
+  p { position: absolute; left: 72px; bottom: 58px; margin: 0; font-size: 28px; font-weight: 500; }
+  img { position: absolute; right: 64px; top: 56px; width: 372px; border-radius: 8px; box-shadow: 0 24px 60px rgb(20 22 15 / 35%); }
+</style>
+<div class="brand"><svg viewBox="240 240 560 544"><circle cx="429" cy="512" r="168"/><path d="M642.5 283.1A313 313 0 0 1 642.5 740.9"/></svg>Quickaside</div>
+<h1>Answers while you're still on the call.</h1>
+<p>Free and open source, for your Mac.</p>
+<img src="panel.png" alt="">

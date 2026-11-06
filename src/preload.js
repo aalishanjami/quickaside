@@ -24,7 +24,7 @@ const CHANNELS = new Set([
   'calls:changed',
 ]);
 
-contextBridge.exposeInMainWorld('callaside', {
+contextBridge.exposeInMainWorld('quickaside', {
   getState: () => ipcRenderer.invoke('state:get'),
   updateSettings: (patch) => ipcRenderer.invoke('settings:update', patch),
   openSettings: (section) => ipcRenderer.invoke('settings:open', section),

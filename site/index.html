@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'self'; script-src 'self'; base-uri 'none'; form-action 'none'">
+  <title>Quickaside: answers while you're still on the call</title>
+  <meta name="description" content="A side panel for your Mac. It transcribes your call as it happens, and when the other person asks something, an answer appears beside the call. Free and open source.">
+  <meta name="theme-color" content="#ffd60a">
+  <link rel="canonical" href="https://quickaside.vercel.app/">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon.png">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Quickaside">
+  <meta property="og:title" content="Answers while you're still on the call">
+  <meta property="og:description" content="A side panel for your Mac that answers from your own notes, through your own Claude Code. Free and open source.">
+  <meta property="og:url" content="https://quickaside.vercel.app/">
+  <meta property="og:image" content="https://quickaside.vercel.app/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Quickaside: answers while you're still on the call.">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="site.css">
+  <script src="site.js" defer></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="hero">
+    <svg class="hero-arc" viewBox="560 240 240 544" aria-hidden="true"><path d="M642.5 283.1A313 313 0 0 1 642.5 740.9"/></svg>
+
+    <nav class="wrap nav" aria-label="Main">
+      <a class="brand" href="./">
+        <svg class="mark" viewBox="240 240 560 544" aria-hidden="true"><circle cx="429" cy="512" r="168"/><path d="M642.5 283.1A313 313 0 0 1 642.5 740.9"/></svg>
+        Quickaside
+      </a>
+      <div class="nav-links">
+        <a href="#install">Install</a>
+        <a href="privacy.html">Privacy</a>
+        <a href="https://github.com/aalishanjami/quickaside">GitHub</a>
+      </div>
+    </nav>
+
+    <div class="wrap hero-body">
+      <div class="hero-copy">
+        <h1>Answers while you're still on the call.</h1>
+        <p class="lede">Quickaside is a side panel for your Mac. It transcribes your call as it happens, and when the other person asks something, an answer appears beside the call. Answers come from your own notes, through your own Claude Code.</p>
+        <div class="cmd">
+          <code>curl -fsSL https://raw.githubusercontent.com/<wbr>aalishanjami/quickaside/<wbr>main/scripts/install.sh | bash</code>
+          <button class="copy" type="button" hidden>Copy</button>
+        </div>
+        <p class="fine">Free and open source. For Macs with Apple Silicon. Needs a paid Claude plan. <a href="#install">See all the steps</a>.</p>
+      </div>
+
+      <figure class="hero-panel">
+        <img src="panel.png" width="420" height="720" alt="The Quickaside panel during a test call with a made-up client. A question about results from another client gets an answer that declines to give numbers it doesn't have. Below it, a question about the pilot gets the price from the project brief.">
+        <figcaption>A real test call, with a made-up client.</figcaption>
+      </figure>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap idea">
+      <p>Note takers write things up after the call. <strong>This helps you during it.</strong></p>
+    </section>
+
+    <section class="wrap" aria-labelledby="how">
+      <h2 id="how">How it works</h2>
+      <ol class="steps">
+        <li>
+          <h3>They ask</h3>
+          <p>Quickaside transcribes both sides of the call on your Mac. It hears what your Mac plays, so no bot joins your call.</p>
+        </li>
+        <li>
+          <h3>It checks your notes</h3>
+          <p>Your own Claude Code reads the call, the client's brief and your notes folder when the question needs them.</p>
+        </li>
+        <li>
+          <h3>You answer</h3>
+          <p>The answer lands in large type, close to your webcam. A full answer usually takes about 6 seconds, and sometimes up to 15. It streams, so you start reading sooner.</p>
+        </li>
+      </ol>
+      <p class="aside-note">Answers are suggestions. Read them before you say them.</p>
+    </section>
+
+    <section class="wrap" aria-labelledby="what">
+      <h2 id="what">What it does</h2>
+      <dl class="spec">
+        <div>
+          <dt>Works with any call app</dt>
+          <dd>Zoom, Meet, Teams, Slack, WhatsApp. When a call starts, it offers to listen. It never starts by itself.</dd>
+        </div>
+        <div>
+          <dt>Says what it doesn't know</dt>
+          <dd>It's told to claim only what's in your notes and the call. In the picture, it won't quote results it doesn't have.</dd>
+        </div>
+        <div>
+          <dt>Keeps clients apart</dt>
+          <dd>Pick a project, and answers use that client's brief first.</dd>
+        </div>
+        <div>
+          <dt>Writes it up after</dt>
+          <dd>A summary, decisions, action items and a follow-up email, with every call searchable.</dd>
+        </div>
+        <div>
+          <dt>Works with your Claude</dt>
+          <dd>Ask about past calls from Claude Code or Claude Desktop, if you turn that on. It can read your calls, and can't change them.</dd>
+        </div>
+        <div>
+          <dt>Free and open source</dt>
+          <dd>No Quickaside account, no subscription and no server of ours. All you need is your Claude plan.</dd>
+        </div>
+      </dl>
+    </section>
+
+    <section class="ledger" aria-labelledby="leaves">
+      <div class="wrap">
+        <h2 id="leaves">What leaves your Mac</h2>
+        <div class="ledger-grid">
+          <div>
+            <h3><span class="lamp ok"></span>Stays on your Mac</h3>
+            <p>Your audio. Speech is transcribed here, and audio is never saved.</p>
+            <p>Your saved calls, notes and settings.</p>
+            <p>Logs, which hold counts and timings and never your words.</p>
+          </div>
+          <div>
+            <h3><span class="lamp warn"></span>Goes to Anthropic</h3>
+            <p>Through your own Claude Code login: the transcript, your questions, your profile, the project brief and any notes Claude reads to answer.</p>
+            <p>With <strong>Answer every question they ask</strong> on, which is the default, this happens during the call without you pressing anything.</p>
+          </div>
+          <div>
+            <h3><span class="lamp off"></span>Comes to us</h3>
+            <p>Nothing. There is no server to collect it. No analytics, no tracking and no crash uploads.</p>
+            <p><a href="privacy.html">Read the full privacy page</a></p>
+          </div>
+        </div>
+        <div class="consent">
+          <h3>Tell people you're transcribing</h3>
+          <p>Their words are transcribed and sent to Anthropic through your account, and some places require everyone's consent. The panel reminds you when a call starts, and has a line you can copy into the meeting chat. If someone asks you to stop, press <strong>Pause</strong>.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="wrap" id="install" aria-labelledby="install-title">
+      <h2 id="install-title">Install</h2>
+      <div class="install">
+        <div class="need">
+          <h3>What you need</h3>
+          <ul>
+            <li>A Mac with Apple Silicon, on macOS 14.2 or later.</li>
+            <li><strong>A paid Claude plan.</strong> Quickaside runs on Claude Code, which needs a Pro, Max, Ultra, Team, Enterprise or Console account. The free plan doesn't include it. Each answer counts toward your plan's usage limits.</li>
+            <li>About 1 GB of disk space, most of it for the speech model.</li>
+          </ul>
+        </div>
+        <ol class="steps stacked">
+          <li>
+            <h3>Install Claude Code and sign in</h3>
+            <p>Skip this if you already use it.</p>
+            <div class="cmd">
+              <code>curl -fsSL https://claude.ai/install.sh | bash</code>
+              <button class="copy" type="button" hidden>Copy</button>
+            </div>
+            <p>Then open a new Terminal window, run <code>claude</code> and log in.</p>
+          </li>
+          <li>
+            <h3>Install Quickaside</h3>
+            <div class="cmd">
+              <code>curl -fsSL https://raw.githubusercontent.com/<wbr>aalishanjami/quickaside/<wbr>main/scripts/install.sh | bash</code>
+              <button class="copy" type="button" hidden>Copy</button>
+            </div>
+            <p>It needs no password. It installs to <code>~/Applications</code>, and checks the app's signature before it touches anything.</p>
+          </li>
+          <li>
+            <h3>Follow the setup window</h3>
+            <p>It checks Claude Code, downloads the speech model and tests your permissions. macOS asks for two, so allow both: the microphone for your side of the call, and system audio recording for theirs.</p>
+          </li>
+        </ol>
+      </div>
+      <p class="aside-note"><strong>Why a Terminal line?</strong> This project isn't in Apple's paid developer program, so macOS would block a browser download. If you'd rather download it, get the zip from <a href="https://github.com/aalishanjami/quickaside/releases/latest">Releases</a>, then allow it in System Settings &gt; Privacy &amp; Security &gt; Open Anyway. The app updates itself after that, and never during a call.</p>
+    </section>
+
+    <section class="wrap" aria-labelledby="know">
+      <h2 id="know">Good to know</h2>
+      <ul class="know">
+        <li>It's for Macs only, for now.</li>
+        <li>It knows You and Them, but not which person on their side said what.</li>
+        <li>It's built for English. Other languages are an option in Settings.</li>
+        <li>Whisper sometimes invents a short line on a quiet line, like "Thank you." The app filters most of these out.</li>
+        <li>It runs on your own Claude login, for your own use. A teammate should run it on their own Mac with their own account.</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <div class="wrap">
+      <p class="foot-links">
+        <a href="privacy.html">Privacy</a>
+        <a href="https://github.com/aalishanjami/quickaside/blob/main/SECURITY.md">Security</a>
+        <a href="https://github.com/aalishanjami/quickaside">GitHub</a>
+        <a href="https://github.com/aalishanjami/quickaside/issues">Report a problem</a>
+      </p>
+      <p>Quickaside is an independent project under the MIT licence. It is not made or endorsed by Anthropic, and it runs Claude Code under your own account. Claude is a trademark of Anthropic.</p>
+    </div>
+  </footer>
+</body>
+</html>

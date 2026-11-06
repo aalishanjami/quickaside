@@ -42,7 +42,7 @@ test('a dedicated call app wins over a browser', () => {
 test('dictation and this app do not count as calls', () => {
   assert.strictEqual(callAppName(['com.apple.SpeechRecognitionCore.speechrecognitiond']), null);
   assert.strictEqual(callAppName(['/usr/bin/some-tool']), null);
-  assert.strictEqual(callAppName(['ai.callaside.app']), null);
+  assert.strictEqual(callAppName(['io.github.aalishanjami.quickaside']), null);
   assert.strictEqual(callAppName(['com.github.Electron.helper']), null);
   assert.strictEqual(callAppName([]), null);
 });
@@ -430,7 +430,7 @@ test('the update address comes from the repo and version', () => {
   u.start();
   u.stop();
   assert.deepStrictEqual(auto.calls, ['https://update.electronjs.org/a/b/darwin-arm64/1.2.3']);
-  assert.strictEqual(repoFromIssues('https://github.com/aalishanjami/callaside/issues'), 'aalishanjami/callaside');
+  assert.strictEqual(repoFromIssues('https://github.com/aalishanjami/quickaside/issues'), 'aalishanjami/quickaside');
 });
 
 test('a build that cannot update stays off', () => {

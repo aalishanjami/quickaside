@@ -34,8 +34,8 @@ const TOOLS = {
 esac\n`,
   ditto: `${LOG}if [ "$1" = "-x" ]; then
   [ -z "$FAKE_DAMAGED" ] || exit 1
-  mkdir -p "$4/Callaside.app/Contents"
-  echo new > "$4/Callaside.app/Contents/marker"
+  mkdir -p "$4/Quickaside.app/Contents"
+  echo new > "$4/Quickaside.app/Contents/marker"
 else
   mkdir -p "$2"
   cp -R "$1/." "$2/"
@@ -61,7 +61,7 @@ function run(env = {}, { existing = false } = {}) {
   for (const [name, body] of Object.entries(TOOLS)) {
     fs.writeFileSync(path.join(bin, name), `#!/bin/bash\n${body}`, { mode: 0o755 });
   }
-  const marker = path.join(home, 'Applications', 'Callaside.app', 'Contents', 'marker');
+  const marker = path.join(home, 'Applications', 'Quickaside.app', 'Contents', 'marker');
   if (existing) {
     fs.mkdirSync(path.dirname(marker), { recursive: true });
     fs.writeFileSync(marker, 'old\n');
@@ -79,14 +79,14 @@ test('it downloads the tagged zip, checks the signature, installs and opens', ()
   const r = run();
   assert.strictEqual(r.status, 0, r.stderr);
   assert.strictEqual(r.installed, 'new');
-  assert.match(r.log, /releases\/download\/v1\.2\.3\/Callaside-1\.2\.3-mac-arm64\.zip/);
+  assert.match(r.log, /releases\/download\/v1\.2\.3\/Quickaside-1\.2\.3-mac-arm64\.zip/);
   const certificate = /^CERT="(.*)"$/m.exec(script('install.sh'))[1];
   assert.ok(r.log.includes(`-R=certificate leaf = H"${certificate}"`), r.log);
   const steps = r.log.trim().split('\n').map((l) => l.split(' ').slice(0, 2).join(' '));
   assert.ok(steps.indexOf('ditto -x') < steps.findIndex((s) => s.startsWith('codesign')), r.log);
   const copied = steps.findIndex((s) => s.startsWith('ditto /'));
   assert.ok(steps.findIndex((s) => s.startsWith('codesign')) < copied, 'checked before it is copied');
-  assert.match(r.log, /open .*Applications\/Callaside\.app/);
+  assert.match(r.log, /open .*Applications\/Quickaside\.app/);
 });
 
 test('a download with the wrong signature is never installed', () => {
@@ -139,8 +139,8 @@ test('a running app is quit before it is replaced', () => {
   fs.writeFileSync(running, '');
   const r = run({ FAKE_RUNNING: running }, { existing: true });
   assert.strictEqual(r.status, 0, r.stderr);
-  assert.match(r.stdout, /Quitting Callaside/);
-  assert.match(r.log, /application id "ai\.callaside\.app" to quit/);
+  assert.match(r.stdout, /Quitting Quickaside/);
+  assert.match(r.log, /application id "io\.github\.aalishanjami\.quickaside" to quit/);
   assert.strictEqual(r.installed, 'new');
 });
 
